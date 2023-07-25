@@ -72,6 +72,11 @@ make install
 cd ../
 ```
 
+7. boost
+```bash
+sudo apt-get install libboost-all-dev
+```
+
 Setup system system library path (Optional)
 ```bash
 echo export CPLUS_INCLUDE_PATH=$LIB_INSTALL_PATH/include:$CPLUS_INCLUDE_PATH >> ~/.bashrc
