@@ -1,0 +1,15 @@
+total 0
+dr-x------ 2 root    root     0 Jul  4 18:45 .
+dr-xr-xr-x 9 vagrant vagrant  0 Jul  4 18:45 ..
+lrwx------ 1 root    root    64 Jul  4 18:45 0 -> /dev/null
+lrwx------ 1 root    root    64 Jul  4 18:45 1 -> /dev/null
+lrwx------ 1 root    root    64 Jul  4 18:45 11 -> /dev/ptmx
+lrwx------ 1 root    root    64 Jul  4 18:45 12 -> /dev/ptmx
+lrwx------ 1 root    root    64 Jul  4 18:45 2 -> /dev/null
+lrwx------ 1 root    root    64 Jul  4 18:45 3 -> socket:[523202]
+lrwx------ 1 root    root    64 Jul  4 18:45 4 -> socket:[528524]
+lrwx------ 1 root    root    64 Jul  4 18:45 5 -> socket:[528577]
+lr-x------ 1 root    root    64 Jul  4 18:45 6 -> pipe:[526483]
+l-wx------ 1 root    root    64 Jul  4 18:45 7 -> /run/systemd/sessions/589.ref
+l-wx------ 1 root    root    64 Jul  4 18:45 8 -> pipe:[526483]
+lrwx------ 1 root    root    64 Jul  4 18:45 9 -> /dev/ptmx

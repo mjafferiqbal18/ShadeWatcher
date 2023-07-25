@@ -1,0 +1,7 @@
+total 0
+dr-x------ 2 root root  0 Jul  5 14:57 .
+dr-xr-xr-x 9 root root  0 Jul  5 14:57 ..
+lrwx------ 1 root root 64 Jul  5 14:57 0 -> /dev/pts/1
+lrwx------ 1 root root 64 Jul  5 14:57 1 -> /dev/pts/1
+lrwx------ 1 root root 64 Jul  5 14:57 2 -> /dev/pts/1
+lr-x------ 1 root root 64 Jul  5 14:57 255 -> /home/vagrant/ShadeWatcher/audit/config.sh

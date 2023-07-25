@@ -4,6 +4,8 @@
 #include "parser/kg.h"
 #include "file.h"
 
+typedef std::unordered_map<hash_t, int64_t, HashFunction> nodemap;
+
 class LocalStore
 {
 public:
@@ -15,6 +17,9 @@ public:
     nodenum_t socket_num;
     nodenum_t file_num;
     event_t edge_num;
+    nodemap node_map;
+
+    int numTrainLines = 0;
 
     LocalStore(std::string, KG *);
 
@@ -22,15 +27,25 @@ public:
     void StoreFile();
     void StoreSocket();
     void StoreEdge(int);
-
+    void StoreEntityFile();
+    void StoreInteractionFile();
+    void StoreRelationFile();
+    void StoreTrainFile();
+    void StoreRecommendationModelFiles();
+    void SetNodeMap();
     // store KG to local files
     void KGStoreToFile(int = 0);
+
+    // new
+    void StoreMaliciousTruthFile();
 
     // store Darpa system entity information
     void EntityStoreToFile();
 
     // Count the number of procs, files, sockets, and edges
     void DumpProcFileSocketEdge2FactSize(int = 0);
+
+    void StoreNodeHashToUuidFile();
 };
 
 // load KG from local files

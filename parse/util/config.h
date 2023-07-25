@@ -13,7 +13,7 @@
 #include "parser/common.h"
 #include "cmdargument.h"
 
-class Config: public CmdArgument
+class Config : public CmdArgument
 {
 public:
     bool graph;
@@ -21,7 +21,7 @@ public:
     bool ld_all_edg_flag = false;
     bool storeentity = false;
     bool loadentity = false;
-    
+
     std::string edg_ld_files;
     std::string delschema;
     std::string embed_data_path;
@@ -41,6 +41,8 @@ public:
     bool loadfromfile = false;
     bool trace = false;
     bool dataset = false;
+    bool malicious_truth = false;     // new
+    std::string malicious_truth_path; // new
     int dataset_type;
     std::string multithread_config = "../config/multithread.cfg";
     std::string kafka_config = "../config/kafka.cfg";
@@ -54,14 +56,14 @@ public:
 
     Config(int, char **);
     void EnsureDir(std::string);
-    bool TestConfigFile(std::string&);
+    bool TestConfigFile(std::string &);
     void ConfigDar();
     void ConfigBeat();
     void ConfigKafka();
 };
 
-std::map<std::string,std::string> LoadPostgresConfig(std::string);
-std::map<std::string,std::string> LoadNeo4jConfig(std::string);
+std::map<std::string, std::string> LoadPostgresConfig(std::string);
+std::map<std::string, std::string> LoadNeo4jConfig(std::string);
 std::map<std::string, multi_t> LoadMultithreadConfig(std::string);
 std::map<std::string, std::string> LoadKafkaConfig(std::string);
 

@@ -39,10 +39,10 @@ DRIVERDAR_OBJ = $(patsubst %.cpp, %.o, $(DRIVERDAR_SRC))
 DRIVERKAFKA_OBJ = $(patsubst %.cpp, %.o, $(DRIVERKAFKA_SRC))
 
 # Option (debug/progress)
-export OPT = -std=c++17 
-VER = normal
+export OPT = -std=c++14
+VER = debug
 ifeq ($(VER), debug)
-	OPT += -O0 -g -DDEBUG
+	OPT += -O1 -g -DDEBUG
 else
 	OPT += -O3
 endif
@@ -65,12 +65,15 @@ JSON_LIB = -ljsoncpp
 THREAD_LIB = -pthread
 GRAPHVIZ_LIB = -lgvc
 KAFKA_LIB = -lrdkafka++
-LIBS += $(LIB_PATH) $(strip $(NEO4J_LIB) $(CONFIG_LIB) $(POSTGRESQL_LIB) $(JSON_LIB) $(THREAD_LIB))
+BOOST_SYSTEM_LIB = -lboost_system 
+BOOST_FILESYSTEM_LIB = -lboost_filesystem
+LIBS += $(LIB_PATH) $(strip $(NEO4J_LIB) $(CONFIG_LIB) $(POSTGRESQL_LIB) $(JSON_LIB) $(THREAD_LIB) $(BOOST_SYSTEM_LIB) $(BOOST_FILESYSTEM_LIB))
 
 # Compile
 CC = g++
 WARNINGS = -Wall -Wextra
 CXXFLAGS  = $(WARNINGS) $(OPT)
+
 
 all: $(TARGET)
 

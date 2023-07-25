@@ -1,0 +1,11 @@
+total 0
+dr-x------ 2 root root  0 Jul  5 14:37 .
+dr-xr-xr-x 9 root root  0 Jul  5 14:37 ..
+lr-x------ 1 root root 64 Jul  5 14:37 0 -> /dev/null
+lrwx------ 1 root root 64 Jul  5 14:37 1 -> /dev/null
+lrwx------ 1 root root 64 Jul  5 14:37 2 -> /dev/null
+lrwx------ 1 root root 64 Jul  5 14:37 3 -> socket:[531625]
+lrwx------ 1 root root 64 Jul  5 14:37 4 -> socket:[526683]
+lrwx------ 1 root root 64 Jul  5 14:37 5 -> /dev/ptmx
+lrwx------ 1 root root 64 Jul  5 14:57 6 -> socket:[526688]
+l-wx------ 1 root root 64 Jul  5 14:57 7 -> /run/systemd/sessions/621.ref

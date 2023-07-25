@@ -1,0 +1,21 @@
+total 0
+dr-x------ 2 root       root        0 Jun 13 13:51 .
+dr-xr-xr-x 9 messagebus messagebus  0 Jun 13 13:51 ..
+lrwx------ 1 root       root       64 Jun 13 13:51 0 -> /dev/null
+lrwx------ 1 root       root       64 Jun 13 13:51 1 -> socket:[25872]
+lrwx------ 1 root       root       64 Jun 13 13:51 10 -> socket:[25886]
+lrwx------ 1 root       root       64 Jun 13 13:51 11 -> socket:[25887]
+lrwx------ 1 root       root       64 Jun 13 13:51 12 -> socket:[25888]
+lrwx------ 1 root       root       64 Jun 13 13:51 13 -> socket:[25889]
+lrwx------ 1 root       root       64 Jun 13 13:51 14 -> socket:[25894]
+lrwx------ 1 root       root       64 Jun 13 13:51 15 -> socket:[25896]
+lrwx------ 1 root       root       64 Jun 13 13:51 16 -> socket:[25898]
+lrwx------ 1 root       root       64 Jun 13 13:51 17 -> socket:[30962]
+lrwx------ 1 root       root       64 Jun 13 13:51 2 -> socket:[25872]
+lrwx------ 1 root       root       64 Jun 13 13:51 3 -> socket:[18078]
+lrwx------ 1 root       root       64 Jun 13 13:51 4 -> anon_inode:[eventpoll]
+lrwx------ 1 root       root       64 Jun 13 13:51 5 -> socket:[25880]
+lrwx------ 1 root       root       64 Jun 13 13:51 6 -> socket:[25883]
+lr-x------ 1 root       root       64 Jun 13 13:51 7 -> anon_inode:inotify
+lrwx------ 1 root       root       64 Jun 13 13:51 8 -> socket:[25884]
+lrwx------ 1 root       root       64 Jun 13 13:51 9 -> socket:[25885]

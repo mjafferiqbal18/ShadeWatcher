@@ -1,0 +1,13 @@
+total 0
+dr-x------ 2 root   root    0 Jun 13 13:51 .
+dr-xr-xr-x 9 syslog syslog  0 Jun 13 13:51 ..
+lr-x------ 1 root   root   64 Jun 13 13:51 0 -> /dev/null
+l-wx------ 1 root   root   64 Jun 13 13:51 1 -> /dev/null
+l-wx------ 1 root   root   64 Jun 13 13:51 2 -> /dev/null
+lrwx------ 1 root   root   64 Jun 13 13:51 3 -> socket:[12809]
+lr-x------ 1 root   root   64 Jun 13 13:51 4 -> /dev/urandom
+lr-x------ 1 root   root   64 Jun 13 13:51 5 -> /proc/kmsg
+lrwx------ 1 root   root   64 Jun 13 13:51 6 -> socket:[31963]
+l-wx------ 1 root   root   64 Jun 13 13:51 7 -> /var/log/auth.log
+l-wx------ 1 root   root   64 Jun 13 13:51 8 -> /var/log/syslog
+l-wx------ 1 root   root   64 Jun 13 13:51 9 -> /var/log/kern.log

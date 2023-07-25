@@ -1,73 +1,94 @@
 #include "parserdar.h"
 #include "multithread.h"
 
-int BatchSize(event_t logNum) {
-	if (logNum <= 10000) {
+int BatchSize(event_t logNum)
+{
+	if (logNum <= 10000)
+	{
 		return 1;
-	} else if (logNum <= 100000) {
+	}
+	else if (logNum <= 100000)
+	{
 		return 10;
-	} else {
+	}
+	else
+	{
 		return 100;
 	}
 }
 
 // single-thread KG construction
-void KGDarpaParse(std::string darpa_file, KG *infotbl, int dataset_type) {
+void KGDarpaParse(std::string darpa_file, KG *infotbl, int dataset_type)
+{
 	auto start = OverheadStart();
-	
+
 	// Read Log: compute offsets
-	std::cout << "darpa file: " << darpa_file << std::endl;
 	LogLoader *logload = new LogLoader(darpa_file);
+
 	logload->LoadDARPALog();
+
 	event_t event_num = logload->event_num;
 
 	Json::Value event;
 	Triplet t(event, infotbl, dataset_type);
 
-	// progress bar parameters
-	#ifdef BAR
-		float progress = 0.0;
-		int width = 50;
-		int batchSize = BatchSize(event_num);
-		int batchNum = event_num / batchSize;
-		float addup = 1.0 / batchNum;
-		int batchDeal = 0;
-	#endif
+// progress bar parameters
+#ifdef BAR
+	float progress = 0.0;
+	int width = 50;
+	int batchSize = BatchSize(event_num);
+	int batchNum = event_num / batchSize;
+	float addup = 1.0 / batchNum;
+	int batchDeal = 0;
+#endif
 
-	for (event_t id = 0; id < event_num; id++) {
-		// Progress bar: high overhead (0.71s -> 0.93s)
-		#ifdef BAR
-			int newBatchDeal = id / batchSize;
-			if (newBatchDeal > batchDeal) {
-				ProgressBar(width, progress, addup);
-				batchDeal = newBatchDeal;
-			}
-		#endif
-		
+	int count = 0;
+	for (event_t id = 0; id < event_num; id++)
+	{
+// Progress bar: high overhead (0.71s -> 0.93s)
+#ifdef BAR
+		int newBatchDeal = id / batchSize;
+		if (newBatchDeal > batchDeal)
+		{
+			ProgressBar(width, progress, addup);
+			batchDeal = newBatchDeal;
+		}
+#endif
+
 		// read event in json format from audit logs
 		logload->GetEvent(id, event);
 
 		// translate events into triplets
-		if (event["datum"].isMember("com.bbn.tc.schema.avro.cdm18.Event")){
+		if (event["datum"].isMember("com.bbn.tc.schema.avro.cdm18.Event"))
+		{
 			t.Event2triplet();
-		} else if (event["datum"].isMember("com.bbn.tc.schema.avro.cdm18.Subject")){
+		}
+		else if (event["datum"].isMember("com.bbn.tc.schema.avro.cdm18.Subject"))
+		{
 			t.LoadProc();
-		} else if (event["datum"].isMember("com.bbn.tc.schema.avro.cdm18.FileObject")){
+		}
+		else if (event["datum"].isMember("com.bbn.tc.schema.avro.cdm18.FileObject"))
+		{
 			t.LoadFile();
-		} else if (event["datum"].isMember("com.bbn.tc.schema.avro.cdm18.NetFlowObject")) {
+		}
+		else if (event["datum"].isMember("com.bbn.tc.schema.avro.cdm18.NetFlowObject"))
+		{
 			t.LoadSock();
 		}
 	}
-	delete(logload);
+	delete (logload);
 
 	// Not all events in logload are analyzed
 	// t.event_analyzed record #events before noise reduction
 	infotbl->event_num += t.event_analyzed;
 
 	// Reduce noise:
-	// comment the following two lines to do the stat without noise reduction 
+	// comment the following two lines to do the stat without noise reduction
 	ReduceNoise noise_reduction(infotbl);
 	noise_reduction.DeleteNoise();
+
+	std::cout << "Finding Interactions" << std::endl;
+	infotbl->FindAllObjectInteractions();
 
 	// count original edges in a graph
 	infotbl->edge_num += infotbl->KGEdgeTable.size();
@@ -75,12 +96,37 @@ void KGDarpaParse(std::string darpa_file, KG *infotbl, int dataset_type) {
 	OverheadEnd(start, "KG construction");
 }
 
-void KGConstruction(std::string darpa_file, KG *infotbl, Config &cfg) {
-	if (cfg.work_threads > 1) {
+void KGConstruction(std::string darpa_file, KG *infotbl, Config &cfg)
+{
+	if (cfg.work_threads > 1)
+	{
 		// multi-thread KG construction (advanced multithread impelmentaion)
 		MultithreadConstruction(darpa_file, infotbl, cfg);
 	}
-	else {
+	else
+	{
 		KGDarpaParse(darpa_file, infotbl, cfg.dataset_type);
 	}
+}
+
+// new
+void appendMaliciousInteractions(const std::string &maliciousTruthPath, KG *infotbl)
+{
+	std::ifstream file(maliciousTruthPath);
+	if (!file.is_open())
+	{
+		std::cout << "Error: Could not open truth file " << maliciousTruthPath << std::endl;
+		return;
+	}
+
+	std::string line;
+	while (std::getline(file, line))
+	{
+		if (line != "" || line != "\n")
+		{
+			infotbl->maliciousInteractionMap[line] = line;
+		}
+	}
+
+	file.close();
 }

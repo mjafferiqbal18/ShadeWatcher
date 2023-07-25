@@ -207,7 +207,7 @@ class GNN(object):
 
         # prediction
         self.batch_predictions = tf.matmul(self.e_e, self.neg_e_e, transpose_a=False, transpose_b=True)
-        
+
         logger.info('finish building inter model')
 
     def _create_gcn_embed(self) -> tf.Tensor:
@@ -358,6 +358,9 @@ class GNN(object):
             # generate positive sub batch to calculate pos_scores
             _pos_e_e = self.pos_e_e[i::self.inter_pos_rate]
             pos_scores += tf.reduce_sum(tf.multiply(self.e_e, _pos_e_e), axis=1)
+            
+            #if (i == 0):
+                #logger.info(("POS EE:", _pos_e_e))
 
         # regularization for overfitting mitigation
         regularizer = tf.nn.l2_loss(self.e_e) + tf.nn.l2_loss(self.pos_e_e) + \
@@ -701,11 +704,13 @@ class GNN(object):
             else:
                 end = (i_fold + 1) * fold_len
 
+            # logger.warning(end)
             feed_dict = {
                 self.h: self.all_h_list[start:end],
                 self.r: self.all_r_list[start:end],
                 self.neg_t: self.all_t_list[start:end] 
             }
+            # logger.warning(feed_dict)
 
             A_kg_score = sess.run(self.A_kg_score, feed_dict=feed_dict)
             kg_score += list(A_kg_score)

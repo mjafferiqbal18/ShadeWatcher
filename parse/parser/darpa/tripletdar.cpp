@@ -1,6 +1,7 @@
 #include "tripletdar.h"
 
-Triplet::Triplet(const Json::Value &_event, KG* _infotbl, int _dataset_type): event(_event) {
+Triplet::Triplet(const Json::Value &_event, KG *_infotbl, int _dataset_type) : event(_event)
+{
 	infotbl = _infotbl;
 	dataset_type = _dataset_type;
 	event_analyzed = 0;
@@ -30,11 +31,13 @@ Triplet::Triplet(const Json::Value &_event, KG* _infotbl, int _dataset_type): ev
 	syscallMap["EVENT_UPDATE"] = SyscallType_t::Update;
 }
 
-Triplet::~Triplet() {
+Triplet::~Triplet()
+{
 	syscallMap.clear();
 }
 
-void Triplet::Event2triplet() {
+void Triplet::Event2triplet()
+{
 	std::string syscall_str = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["type"]);
 
 	// Temporarily deal with the EVENT_BOOT
@@ -45,7 +48,7 @@ void Triplet::Event2triplet() {
 	std::string sub = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["subject"]["com.bbn.tc.schema.avro.cdm18.UUID"]);
 	std::string obj = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["predicateObject"]["com.bbn.tc.schema.avro.cdm18.UUID"]);
 	seq_t seq = Jval2int(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["sequence"]["long"]);
-	std::string timestamp = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["timestampNanos"]);	
+	std::string timestamp = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["timestampNanos"]);
 	// Currently, we treat each graph as a session. That is, there is no session concept in darpa dataset
 	// Todo: {"datum":{"com.bbn.tc.schema.avro.cdm18.StartMarker":{"sessionNumber":3}},"CDMVersion":"18","source":"SOURCE_LINUX_SYSCALL_TRACE"}
 	sess_t sess = 0;
@@ -55,205 +58,253 @@ void Triplet::Event2triplet() {
 	hash_t obj_id = (hash_t)hasher(obj);
 	hash_t e_id = (hash_t)hasher(uuid);
 
-	switch(syscallMap[syscall_str]) {
-		case SyscallType_t::Execve: {
-			SyscallExecve(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
+	// new
+	if (infotbl->malicious_truth)
+	{ // if malicious truth is provided
+		auto mal_uuid = infotbl->maliciousInteractionMap.find(uuid);
+		if (mal_uuid != infotbl->maliciousInteractionMap.end())
+		{ // if event is malicious
+			KGEdge *e = new KGEdge(sub_id, obj_id, EdgeType_t::NotDefined, seq, sess, e_id, timestamp);
+			infotbl->InsertMaliciousEdge(e_id, e);
 		}
-		case SyscallType_t::Open: {
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Close: {
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Clone: {
-			SyscallClone(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Connect: {
-			SyscallConnect(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Delete: {
-			SyscallDelete(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Read: {
-			SyscallRead(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Write: {
-			SyscallWrite(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Recvfrom: {
-			SyscallRecvfrom(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Sendto: {
-			SyscallSendto(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Sendmsg: {
-			SyscallSendmsg(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Recvmsg: {
-			SyscallRecvmsg(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Send: {
-			SyscallSend(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Recv: {
-			SyscallRecv(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Rename: {
-			std::string obj2 = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["predicateObject2"]["com.bbn.tc.schema.avro.cdm18.UUID"]);
-			SyscallRename(seq, sess, sub_id, obj_id, obj, obj2, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Load: {
-			SyscallLoad(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Create: {
-			SyscallCreate(seq, sess, sub_id, obj_id, e_id, timestamp);
-			event_analyzed++;
-			break;
-		}
-		case SyscallType_t::Update: {
-			std::string obj2 = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["predicateObject2"]["com.bbn.tc.schema.avro.cdm18.UUID"]);
-			SyscallUpdate(seq, sess, sub_id, obj_id, obj, obj2, timestamp);
-			event_analyzed++;
-			break;
-		}
-		default: {
-			break;
-		}
+	}
+
+	switch (syscallMap[syscall_str])
+	{
+	case SyscallType_t::Execve:
+	{
+		SyscallExecve(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Open:
+	{
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Close:
+	{
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Clone:
+	{
+		SyscallClone(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Connect:
+	{
+		SyscallConnect(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Delete:
+	{
+		SyscallDelete(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Read:
+	{
+		SyscallRead(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Write:
+	{
+		SyscallWrite(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Recvfrom:
+	{
+		SyscallRecvfrom(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Sendto:
+	{
+		SyscallSendto(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Sendmsg:
+	{
+		SyscallSendmsg(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Recvmsg:
+	{
+		SyscallRecvmsg(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Send:
+	{
+		SyscallSend(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Recv:
+	{
+		SyscallRecv(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Rename:
+	{
+		std::string obj2 = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["predicateObject2"]["com.bbn.tc.schema.avro.cdm18.UUID"]);
+		SyscallRename(seq, sess, sub_id, obj_id, obj, obj2, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Load:
+	{
+		SyscallLoad(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Create:
+	{
+		SyscallCreate(seq, sess, sub_id, obj_id, e_id, timestamp);
+		event_analyzed++;
+		break;
+	}
+	case SyscallType_t::Update:
+	{
+		std::string obj2 = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["predicateObject2"]["com.bbn.tc.schema.avro.cdm18.UUID"]);
+		SyscallUpdate(seq, sess, sub_id, obj_id, obj, obj2, timestamp);
+		event_analyzed++;
+		break;
+	}
+	default:
+	{
+		break;
+	}
 	}
 }
 
-void Triplet::SyscallClone(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id , std::string timestamp) {
-	KGEdge *e = new KGEdge (sub_id, obj_id, EdgeType_t::Clone, seq, sess, e_id, timestamp);
+void Triplet::SyscallClone(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(sub_id, obj_id, EdgeType_t::Clone, seq, sess, e_id, timestamp);
 	infotbl->InsertEdge(e_id, e);
 }
 
-void Triplet::SyscallExecve(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
+void Triplet::SyscallExecve(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
 	KGEdge *e;
-	if (dataset_type == 0) {
-		e = new KGEdge (sub_id, obj_id, EdgeType_t::Execve, seq, sess, e_id, timestamp);
+	if (dataset_type == 0)
+	{
+		e = new KGEdge(sub_id, obj_id, EdgeType_t::Execve, seq, sess, e_id, timestamp);
 	}
-	else if (dataset_type == 1) {
-		e = new KGEdge (obj_id, sub_id, EdgeType_t::Execve, seq, sess, e_id, timestamp);
+	else if (dataset_type == 1)
+	{
+		e = new KGEdge(obj_id, sub_id, EdgeType_t::Execve, seq, sess, e_id, timestamp);
 	}
-	else {
+	else
+	{
 		return;
 	}
 
 	infotbl->InsertEdge(e_id, e);
-	// file => proc 
+	// file => proc
 	// cannot do it in this way, do we need a search here?
 	infotbl->InsertFileInteraction(obj_id, e);
 	infotbl->InsertProcInteraction(sub_id, e);
 }
 
-void Triplet::SyscallOpen(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
-	KGEdge *e = new KGEdge (sub_id, obj_id, EdgeType_t::Open, seq, sess, e_id, timestamp);
-	infotbl->InsertEdge(e_id, e);
-	infotbl->InsertFileInteraction(obj_id, e);	
-	infotbl->InsertProcInteraction(sub_id, e);
-}
-
-void Triplet::SyscallConnect(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
-	KGEdge *e = new KGEdge (sub_id, obj_id, EdgeType_t::Connect, seq, sess, e_id, timestamp);
+void Triplet::SyscallOpen(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(sub_id, obj_id, EdgeType_t::Open, seq, sess, e_id, timestamp);
 	infotbl->InsertEdge(e_id, e);
 	infotbl->InsertFileInteraction(obj_id, e);
 	infotbl->InsertProcInteraction(sub_id, e);
 }
 
-void Triplet::SyscallDelete(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
-	KGEdge *e = new KGEdge (sub_id, obj_id, EdgeType_t::Delete, seq, sess, e_id, timestamp);
+void Triplet::SyscallConnect(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(sub_id, obj_id, EdgeType_t::Connect, seq, sess, e_id, timestamp);
 	infotbl->InsertEdge(e_id, e);
 	infotbl->InsertFileInteraction(obj_id, e);
 	infotbl->InsertProcInteraction(sub_id, e);
 }
 
-void Triplet::SyscallRead(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
-	KGEdge *e = new KGEdge (obj_id, sub_id, EdgeType_t::Read, seq, sess, e_id, timestamp);
+void Triplet::SyscallDelete(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(sub_id, obj_id, EdgeType_t::Delete, seq, sess, e_id, timestamp);
 	infotbl->InsertEdge(e_id, e);
 	infotbl->InsertFileInteraction(obj_id, e);
 	infotbl->InsertProcInteraction(sub_id, e);
 }
 
-void Triplet::SyscallWrite(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
-	KGEdge *e = new KGEdge (sub_id, obj_id, EdgeType_t::Write, seq, sess, e_id, timestamp);
+void Triplet::SyscallRead(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(obj_id, sub_id, EdgeType_t::Read, seq, sess, e_id, timestamp);
 	infotbl->InsertEdge(e_id, e);
 	infotbl->InsertFileInteraction(obj_id, e);
 	infotbl->InsertProcInteraction(sub_id, e);
 }
 
-void Triplet::SyscallRecvfrom(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
-	KGEdge *e = new KGEdge (obj_id, sub_id, EdgeType_t::Recv, seq, sess, e_id, timestamp);
+void Triplet::SyscallWrite(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(sub_id, obj_id, EdgeType_t::Write, seq, sess, e_id, timestamp);
 	infotbl->InsertEdge(e_id, e);
 	infotbl->InsertFileInteraction(obj_id, e);
 	infotbl->InsertProcInteraction(sub_id, e);
 }
 
-void Triplet::SyscallSendto(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
-	KGEdge *e = new KGEdge (sub_id, obj_id, EdgeType_t::Send, seq, sess, e_id, timestamp);
+void Triplet::SyscallRecvfrom(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(obj_id, sub_id, EdgeType_t::Recv, seq, sess, e_id, timestamp);
 	infotbl->InsertEdge(e_id, e);
 	infotbl->InsertFileInteraction(obj_id, e);
 	infotbl->InsertProcInteraction(sub_id, e);
 }
 
-void Triplet::SyscallSendmsg(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
-	KGEdge *e = new KGEdge (sub_id, obj_id, EdgeType_t::Send, seq, sess, e_id, timestamp);
+void Triplet::SyscallSendto(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(sub_id, obj_id, EdgeType_t::Send, seq, sess, e_id, timestamp);
 	infotbl->InsertEdge(e_id, e);
 	infotbl->InsertFileInteraction(obj_id, e);
 	infotbl->InsertProcInteraction(sub_id, e);
 }
 
-void Triplet::SyscallRecvmsg(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
-	KGEdge *e = new KGEdge (obj_id, sub_id, EdgeType_t::Recv, seq, sess, e_id, timestamp);
+void Triplet::SyscallSendmsg(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(sub_id, obj_id, EdgeType_t::Send, seq, sess, e_id, timestamp);
 	infotbl->InsertEdge(e_id, e);
 	infotbl->InsertFileInteraction(obj_id, e);
 	infotbl->InsertProcInteraction(sub_id, e);
 }
 
-void Triplet::SyscallSend(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
-	KGEdge *e = new KGEdge (sub_id, obj_id, EdgeType_t::Send, seq, sess, e_id, timestamp);
+void Triplet::SyscallRecvmsg(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(obj_id, sub_id, EdgeType_t::Recv, seq, sess, e_id, timestamp);
 	infotbl->InsertEdge(e_id, e);
 	infotbl->InsertFileInteraction(obj_id, e);
 	infotbl->InsertProcInteraction(sub_id, e);
 }
 
-void Triplet::SyscallRecv(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
-	KGEdge *e = new KGEdge (obj_id, sub_id, EdgeType_t::Recv, seq, sess, e_id, timestamp);
+void Triplet::SyscallSend(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(sub_id, obj_id, EdgeType_t::Send, seq, sess, e_id, timestamp);
 	infotbl->InsertEdge(e_id, e);
 	infotbl->InsertFileInteraction(obj_id, e);
 	infotbl->InsertProcInteraction(sub_id, e);
 }
 
-void Triplet::SyscallRename(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, std::string obj, std::string obj2, std::string timestamp) {
+void Triplet::SyscallRecv(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(obj_id, sub_id, EdgeType_t::Recv, seq, sess, e_id, timestamp);
+	infotbl->InsertEdge(e_id, e);
+	infotbl->InsertFileInteraction(obj_id, e);
+	infotbl->InsertProcInteraction(sub_id, e);
+}
+
+void Triplet::SyscallRename(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, std::string obj, std::string obj2, std::string timestamp)
+{
 	std::hash<std::string> hasher;
 	hash_t obj2_id = (hash_t)hasher(obj2);
 
@@ -263,32 +314,35 @@ void Triplet::SyscallRename(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id
 	hash_t e1_id = (hash_t)hasher(sess_str + obj);
 	hash_t e2_id = (hash_t)hasher(sess_str + obj2);
 
-	KGEdge *e1 = new KGEdge (obj_id, sub_id, EdgeType_t::Read, seq, sess, e1_id, timestamp);
+	KGEdge *e1 = new KGEdge(obj_id, sub_id, EdgeType_t::Read, seq, sess, e1_id, timestamp);
 	infotbl->InsertEdge(e1_id, e1);
 	infotbl->InsertFileInteraction(obj_id, e1);
 	infotbl->InsertProcInteraction(sub_id, e1);
 
-	KGEdge *e2 = new KGEdge (sub_id, obj2_id, EdgeType_t::Write, seq, sess, e2_id, timestamp);
+	KGEdge *e2 = new KGEdge(sub_id, obj2_id, EdgeType_t::Write, seq, sess, e2_id, timestamp);
 	infotbl->InsertEdge(e2_id, e2);
 	infotbl->InsertFileInteraction(obj2_id, e2);
 	infotbl->InsertProcInteraction(sub_id, e2);
 }
 
-void Triplet::SyscallLoad(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
-	KGEdge *e = new KGEdge (obj_id, sub_id, EdgeType_t::Load, seq, sess, e_id, timestamp);
+void Triplet::SyscallLoad(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(obj_id, sub_id, EdgeType_t::Load, seq, sess, e_id, timestamp);
 	infotbl->InsertEdge(e_id, e);
 	infotbl->InsertFileInteraction(obj_id, e);
 	infotbl->InsertProcInteraction(sub_id, e);
 }
 
-void Triplet::SyscallCreate(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp) {
-	KGEdge *e = new KGEdge (sub_id, obj_id, EdgeType_t::Create, seq, sess, e_id, timestamp);
+void Triplet::SyscallCreate(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, hash_t e_id, std::string timestamp)
+{
+	KGEdge *e = new KGEdge(sub_id, obj_id, EdgeType_t::Create, seq, sess, e_id, timestamp);
 	infotbl->InsertEdge(e_id, e);
 	infotbl->InsertFileInteraction(obj_id, e);
 	infotbl->InsertProcInteraction(sub_id, e);
 }
 
-void Triplet::SyscallUpdate(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, std::string obj, std::string obj2, std::string timestamp) {
+void Triplet::SyscallUpdate(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id, std::string obj, std::string obj2, std::string timestamp)
+{
 	std::hash<std::string> hasher;
 	hash_t obj2_id = (hash_t)hasher(obj2);
 
@@ -300,27 +354,31 @@ void Triplet::SyscallUpdate(seq_t seq, sess_t sess, hash_t sub_id, hash_t obj_id
 
 	// The information flow is: old obj => sub => new obj
 	// KGEdge *e1 = new KGEdge (obj_id, sub_id, EdgeType_t::Delete, seq, sess, e1_id);
-	KGEdge *e1 = new KGEdge (obj_id, sub_id, EdgeType_t::Delete, seq, sess, e1_id, timestamp);
+	KGEdge *e1 = new KGEdge(obj_id, sub_id, EdgeType_t::Delete, seq, sess, e1_id, timestamp);
 	infotbl->InsertEdge(e1_id, e1);
 	infotbl->InsertFileInteraction(obj_id, e1);
 	infotbl->InsertProcInteraction(sub_id, e1);
 
-	KGEdge *e2 = new KGEdge (sub_id, obj2_id, EdgeType_t::Create, seq, sess, e2_id, timestamp);
+	KGEdge *e2 = new KGEdge(sub_id, obj2_id, EdgeType_t::Create, seq, sess, e2_id, timestamp);
 	infotbl->InsertEdge(e2_id, e2);
 	infotbl->InsertFileInteraction(obj2_id, e2);
 	infotbl->InsertProcInteraction(sub_id, e2);
 }
 
-void Triplet::LoadProc() {
+void Triplet::LoadProc()
+{
 	std::string pid = Jval2strid(event["datum"]["com.bbn.tc.schema.avro.cdm18.Subject"]["cid"]);
 	std::string exe;
-	if (dataset_type == 0) {
+	if (dataset_type == 0)
+	{
 		exe = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Subject"]["properties"]["map"]["name"]);
 	}
-	else if (dataset_type == 1) {
+	else if (dataset_type == 1)
+	{
 		exe = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Subject"]["cmdLine"]["string"]);
 	}
-	else {
+	else
+	{
 		return;
 	}
 
@@ -328,35 +386,55 @@ void Triplet::LoadProc() {
 	std::string ppid = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Subject"]["properties"]["map"]["ppid"]);
 	std::string uuid = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Subject"]["uuid"]);
 
-	NodeProc *p_temp = new NodeProc (pid, exe, args, ppid, uuid);
+	NodeProc *p_temp = new NodeProc(pid, exe, args, ppid, uuid);
 	infotbl->InsertProc(p_temp);
+
+	// new
+	// std::cout << "CHECK THIS: " << *(p_temp->id) << " " << uuid << std::endl;
+	// infotbl->nodeHashToUuid[*(p_temp->id)] = uuid;
+	// std::cout << "CHECK THIS OUT: " << infotbl->nodeHashToUuid[*(p_temp->id)] << std::endl;
+	infotbl->InsertNodeHashToUuidPair(*(p_temp->id), uuid);
+	// std::cout << "TableSize: " << infotbl->nodeHashToUuid.size() << std::endl;
 }
 
-void Triplet::LoadFile() {
+void Triplet::LoadFile()
+{
 	std::string name;
-	if (dataset_type == 0) {
+	if (dataset_type == 0)
+	{
 		name = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.FileObject"]["baseObject"]["properties"]["map"]["path"]);
 	}
-	else if (dataset_type == 1) {
+	else if (dataset_type == 1)
+	{
 		name = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.FileObject"]["baseObject"]["properties"]["map"]["filename"]);
 	}
-	else {
+	else
+	{
 		return;
 	}
 
 	std::string uuid = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.FileObject"]["uuid"]);
 	std::string version = " ";
 
-	NodeFile *f_temp = new NodeFile (name, version, uuid);
+	NodeFile *f_temp = new NodeFile(name, version, uuid);
 	infotbl->InsertFile(f_temp);
+
+	// new
+	// infotbl->nodeHashToUuid[*(f_temp->id)] = uuid;
+	infotbl->InsertNodeHashToUuidPair(*(f_temp->id), uuid);
 }
 
-void Triplet::LoadSock() {
+void Triplet::LoadSock()
+{
 	std::string ip = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.NetFlowObject"]["remoteAddress"]);
 	std::string port = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.NetFlowObject"]["remotePort"]);
 	std::string sname = Jval2str(ip + ":" + port);
 	std::string uuid = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.NetFlowObject"]["uuid"]);
 
-	NodeSocket *s_temp = new NodeSocket (sname, uuid);
+	NodeSocket *s_temp = new NodeSocket(sname, uuid);
 	infotbl->InsertSocket(s_temp);
+
+	// new
+	// infotbl->nodeHashToUuid[*(s_temp->id)] = uuid;
+	infotbl->InsertNodeHashToUuidPair(*(s_temp->id), uuid);
 }

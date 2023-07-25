@@ -1,0 +1,16 @@
+COMMAND     PID            USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+rpcbind     751            root    6u  IPv4  23617      0t0  UDP *:111 
+rpcbind     751            root    7u  IPv4  23618      0t0  UDP *:927 
+rpcbind     751            root    8u  IPv4  23619      0t0  TCP *:111 (LISTEN)
+rpcbind     751            root    9u  IPv6  23620      0t0  UDP *:111 
+rpcbind     751            root   10u  IPv6  23621      0t0  UDP *:927 
+rpcbind     751            root   11u  IPv6  23622      0t0  TCP *:111 (LISTEN)
+systemd-n   763 systemd-network   19u  IPv4 537424      0t0  UDP 10.0.2.15:68 
+systemd-r   799 systemd-resolve   12u  IPv4  16708      0t0  UDP 127.0.0.53:53 
+systemd-r   799 systemd-resolve   13u  IPv4  16709      0t0  TCP 127.0.0.53:53 (LISTEN)
+sshd       1024            root    3u  IPv4  26956      0t0  TCP *:22 (LISTEN)
+sshd       1024            root    4u  IPv6  26958      0t0  TCP *:22 (LISTEN)
+sshd      25376            root    3u  IPv4 531625      0t0  TCP 10.0.2.15:22->10.0.2.2:34802 (ESTABLISHED)
+sshd      25420         vagrant    3u  IPv4 531625      0t0  TCP 10.0.2.15:22->10.0.2.2:34802 (ESTABLISHED)
+sshd      25446            root    3u  IPv4 531681      0t0  TCP 10.0.2.15:22->10.0.2.2:34804 (ESTABLISHED)
+sshd      25477         vagrant    3u  IPv4 531681      0t0  TCP 10.0.2.15:22->10.0.2.2:34804 (ESTABLISHED)

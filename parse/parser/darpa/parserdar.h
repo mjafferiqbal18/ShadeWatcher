@@ -11,7 +11,10 @@
 #include <pthread.h>
 
 int BatchSize(event_t);
-void KGConstruction(std::string, KG *, Config&);
+void KGConstruction(std::string, KG *, Config &);
 void KGDarpaParse(std::string, KG *, int);
+
+// new
+void appendMaliciousInteractions(const std::string &, KG *);
 
 #endif

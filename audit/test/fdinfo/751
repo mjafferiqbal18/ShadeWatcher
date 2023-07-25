@@ -1,0 +1,15 @@
+total 0
+dr-x------ 2 root root  0 Jun 13 13:51 .
+dr-xr-xr-x 9 root root  0 Jun 13 13:51 ..
+lr-x------ 1 root root 64 Jun 13 13:51 0 -> /dev/null
+lrwx------ 1 root root 64 Jun 13 13:51 1 -> socket:[14923]
+lrwx------ 1 root root 64 Jun 13 13:51 10 -> socket:[23621]
+lrwx------ 1 root root 64 Jun 13 13:51 11 -> socket:[23622]
+lrwx------ 1 root root 64 Jun 13 13:51 2 -> socket:[14923]
+lrwx------ 1 root root 64 Jun 13 13:51 3 -> socket:[12815]
+lr-x------ 1 root root 64 Jun 13 13:51 4 -> /run/rpcbind.lock
+lrwx------ 1 root root 64 Jun 13 13:51 5 -> socket:[23624]
+lrwx------ 1 root root 64 Jun 13 13:51 6 -> socket:[23617]
+lrwx------ 1 root root 64 Jun 13 13:51 7 -> socket:[23618]
+lrwx------ 1 root root 64 Jun 13 13:51 8 -> socket:[23619]
+lrwx------ 1 root root 64 Jun 13 13:51 9 -> socket:[23620]

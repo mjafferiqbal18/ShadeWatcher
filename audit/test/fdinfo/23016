@@ -1,0 +1,7 @@
+total 0
+dr-x------ 2 vagrant vagrant  0 Jul  4 18:43 .
+dr-xr-xr-x 9 vagrant vagrant  0 Jul  4 18:43 ..
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 0 -> /dev/pts/0
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 1 -> /dev/pts/0
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 2 -> /dev/pts/0
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:45 255 -> /dev/pts/0

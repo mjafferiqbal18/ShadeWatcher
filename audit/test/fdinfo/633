@@ -1,0 +1,36 @@
+total 0
+dr-x------ 2 root root  0 Jun 13 13:51 .
+dr-xr-xr-x 9 root root  0 Jun 13 13:51 ..
+lr-x------ 1 root root 64 Jun 13 13:51 0 -> /dev/null
+l-wx------ 1 root root 64 Jun 13 13:51 1 -> /dev/null
+lr-x------ 1 root root 64 Jun 13 13:51 10 -> /proc/sys/kernel/hostname
+lrwx------ 1 root root 64 Jun 13 13:51 11 -> anon_inode:[signalfd]
+lrwx------ 1 root root 64 Jun 13 13:51 12 -> anon_inode:[signalfd]
+lrwx------ 1 root root 64 Jun 13 13:51 13 -> anon_inode:[signalfd]
+lrwx------ 1 root root 64 Jun 13 13:51 14 -> socket:[26687]
+lrwx------ 1 root root 64 Jun 13 13:51 15 -> socket:[13581]
+lrwx------ 1 root root 64 Jun 13 13:51 16 -> anon_inode:[timerfd]
+lrwx------ 1 root root 64 Jun 13 13:51 17 -> socket:[525126]
+lrwx------ 1 root root 64 Jun 13 13:51 18 -> socket:[13447]
+lrwx------ 1 root root 64 Jun 13 13:51 19 -> socket:[26731]
+l-wx------ 1 root root 64 Jun 13 13:51 2 -> /dev/null
+lrwx------ 1 root root 64 Jun 13 13:51 20 -> socket:[26729]
+lrwx------ 1 root root 64 Jun 13 13:51 21 -> socket:[18038]
+lrwx------ 1 root root 64 Jun 13 13:51 22 -> socket:[13885]
+lrwx------ 1 root root 64 Jun 13 13:51 23 -> socket:[13521]
+lrwx------ 1 root root 64 Jun 13 13:51 24 -> socket:[13582]
+lrwx------ 1 root root 64 Jun 13 13:51 25 -> socket:[13598]
+lrwx------ 1 root root 64 Jun 13 13:51 26 -> /var/log/journal/d1eaa418318e4c4cbe57dcb2842f2740/system@226ec473accf4816ae837db3f6f2eb20-000000000000a25c-0005ff7fd418898d.journal
+lrwx------ 1 root root 64 Jun 13 13:51 28 -> socket:[13601]
+lrwx------ 1 root root 64 Jun 13 13:51 29 -> /var/log/journal/d1eaa418318e4c4cbe57dcb2842f2740/system.journal
+lrwx------ 1 root root 64 Jun 13 13:51 3 -> socket:[12832]
+lrwx------ 1 root root 64 Jun 13 13:51 30 -> socket:[13603]
+lrwx------ 1 root root 64 Jun 13 13:51 31 -> socket:[13604]
+lrwx------ 1 root root 64 Jun 13 13:51 32 -> socket:[13605]
+lrwx------ 1 root root 64 Jun 13 13:51 33 -> /var/log/journal/d1eaa418318e4c4cbe57dcb2842f2740/user-1000.journal
+lrwx------ 1 root root 64 Jun 13 13:51 4 -> socket:[12833]
+lrwx------ 1 root root 64 Jun 13 13:51 5 -> socket:[12835]
+lrwx------ 1 root root 64 Jun 13 13:51 6 -> socket:[12823]
+l-wx------ 1 root root 64 Jun 13 13:51 7 -> /dev/kmsg
+lrwx------ 1 root root 64 Jun 13 13:51 8 -> anon_inode:[eventpoll]
+lrwx------ 1 root root 64 Jun 13 13:51 9 -> /dev/kmsg

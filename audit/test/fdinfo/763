@@ -1,0 +1,23 @@
+total 0
+dr-x------ 2 systemd-network systemd-network  0 Jun 13 13:51 .
+dr-xr-xr-x 9 systemd-network systemd-network  0 Jun 13 13:51 ..
+lr-x------ 1 systemd-network systemd-network 64 Jun 13 13:51 0 -> /dev/null
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 1 -> socket:[14991]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 10 -> socket:[14999]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 11 -> socket:[15000]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 12 -> socket:[15001]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 13 -> socket:[15002]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 14 -> socket:[15003]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 15 -> socket:[15098]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 16 -> socket:[15018]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 17 -> socket:[15094]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 18 -> anon_inode:[timerfd]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 19 -> socket:[537424]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 2 -> socket:[14991]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 3 -> socket:[14993]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 4 -> anon_inode:[eventpoll]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 5 -> anon_inode:[timerfd]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 6 -> anon_inode:[signalfd]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 7 -> socket:[14997]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 8 -> anon_inode:[timerfd]
+lrwx------ 1 systemd-network systemd-network 64 Jun 13 13:51 9 -> socket:[14998]

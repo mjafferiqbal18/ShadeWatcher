@@ -1,0 +1,23 @@
+total 0
+dr-x------ 2 root root  0 Jun 13 13:51 .
+dr-xr-xr-x 9 root root  0 Jun 13 13:51 ..
+lr-x------ 1 root root 64 Jun 13 13:51 0 -> /dev/null
+lrwx------ 1 root root 64 Jun 13 13:51 1 -> socket:[19761]
+lrwx------ 1 root root 64 Jun 13 13:51 10 -> socket:[19766]
+lrwx------ 1 root root 64 Jun 13 13:51 11 -> socket:[19767]
+lrwx------ 1 root root 64 Jun 13 13:51 12 -> socket:[19768]
+lrwx------ 1 root root 64 Jun 13 13:51 13 -> anon_inode:[timerfd]
+lrwx------ 1 root root 64 Jun 13 13:51 14 -> /dev/input/event0
+lrwx------ 1 root root 64 Jun 13 13:51 15 -> /dev/input/event1
+lrwx------ 1 root root 64 Jun 13 13:51 16 -> /dev/input/event2
+lrwx------ 1 root root 64 Jun 13 13:51 17 -> /dev/tty6
+lr-x------ 1 root root 64 Jun 13 13:51 18 -> /run/systemd/sessions/621.ref
+lr-x------ 1 root root 64 Jun 13 13:51 19 -> /run/systemd/sessions/623.ref
+lrwx------ 1 root root 64 Jun 13 13:51 2 -> socket:[19761]
+lrwx------ 1 root root 64 Jun 13 13:51 3 -> socket:[19762]
+lrwx------ 1 root root 64 Jun 13 13:51 4 -> anon_inode:[eventpoll]
+lrwx------ 1 root root 64 Jun 13 13:51 5 -> anon_inode:[timerfd]
+lrwx------ 1 root root 64 Jun 13 13:51 6 -> anon_inode:[signalfd]
+lr-x------ 1 root root 64 Jun 13 13:51 7 -> /sys/devices/virtual/tty/tty0/active
+lrwx------ 1 root root 64 Jun 13 13:51 8 -> socket:[19764]
+lrwx------ 1 root root 64 Jun 13 13:51 9 -> socket:[19765]

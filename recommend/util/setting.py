@@ -120,7 +120,10 @@ def parse_args() -> argparse.Namespace:
                         help='only train gnn')
     parser.add_argument('--save_embedding', default=False, action='store_true',
                         help='save kg embedding from weights')
-
+    
+    # only training and dont test
+    parser.add_argument('--no_test', default=False, action='store_true',
+                        help='only train and do not test')
     args = parser.parse_args()
 
     # init arguments

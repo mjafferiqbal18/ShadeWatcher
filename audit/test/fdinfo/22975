@@ -1,0 +1,27 @@
+total 0
+dr-x------ 2 vagrant vagrant  0 Jul  4 18:43 .
+dr-xr-xr-x 9 vagrant vagrant  0 Jul  4 18:43 ..
+lr-x------ 1 vagrant vagrant 64 Jul  4 18:43 0 -> /dev/null
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 1 -> socket:[521894]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 10 -> anon_inode:[eventpoll]
+lr-x------ 1 vagrant vagrant 64 Jul  4 18:43 11 -> /proc/22975/mountinfo
+lr-x------ 1 vagrant vagrant 64 Jul  4 18:43 12 -> anon_inode:inotify
+lr-x------ 1 vagrant vagrant 64 Jul  4 18:43 13 -> /proc/swaps
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 14 -> socket:[521911]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 15 -> socket:[521912]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 16 -> socket:[521913]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 17 -> socket:[521914]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 2 -> socket:[521894]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 22 -> socket:[521918]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 23 -> socket:[521919]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 24 -> socket:[521920]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 25 -> socket:[521921]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 26 -> socket:[521922]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 27 -> socket:[521923]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 3 -> socket:[521904]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 4 -> anon_inode:[eventpoll]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 5 -> anon_inode:[signalfd]
+lr-x------ 1 vagrant vagrant 64 Jul  4 18:43 6 -> anon_inode:inotify
+lr-x------ 1 vagrant vagrant 64 Jul  4 18:43 7 -> /sys/fs/cgroup/unified/user.slice/user-1000.slice/user@1000.service
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 8 -> anon_inode:[timerfd]
+lrwx------ 1 vagrant vagrant 64 Jul  4 18:43 9 -> socket:[521907]

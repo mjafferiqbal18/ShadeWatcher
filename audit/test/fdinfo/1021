@@ -1,0 +1,7 @@
+total 0
+dr-x------ 2 root root  0 Jun 13 13:51 .
+dr-xr-xr-x 9 root root  0 Jun 13 13:51 ..
+lrwx------ 1 root root 64 Jun 13 13:51 0 -> /dev/tty1
+lrwx------ 1 root root 64 Jun 13 13:51 1 -> /dev/tty1
+lrwx------ 1 root root 64 Jun 13 13:51 2 -> /dev/tty1
+lr-x------ 1 root root 64 Jun 13 13:51 4 -> anon_inode:inotify

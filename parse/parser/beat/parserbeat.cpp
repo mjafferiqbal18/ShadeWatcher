@@ -80,6 +80,10 @@ void KGBeatParse(std::string auditbeat_file_path, KG *infotbl) {
 	infotbl->DeletePipeEdge();
 	infotbl->DeleteLocalSocket();
 
+	// Find interactions
+	std::cout << "Finding Interactions" << std::endl;
+	infotbl->FindAllObjectInteractions();
+
 	infotbl->edge_num += infotbl->KGEdgeTable.size();
 
 	OverheadEnd(start, "KG construction");

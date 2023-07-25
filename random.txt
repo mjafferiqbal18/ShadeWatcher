@@ -1,0 +1,13 @@
+Load ground truth.
+
+After split in 80, 20
+    Check if 80 contains any malicious interactions
+    if yes, swap with interaction from val_test data
+
+After, everything runs normally for training. 
+
+At validation and testing,
+    if above threshold, if interaction is labelled malicious == tp
+                            else == fp
+    else if below threshold, if interaction is labelled malicious == fn
+                                else == tn  

@@ -1,0 +1,10 @@
+total 0
+dr-x------ 2 root    root     0 Jul  5 14:57 .
+dr-xr-xr-x 9 vagrant vagrant  0 Jul  5 14:37 ..
+lr-x------ 1 root    root    64 Jul  5 14:57 0 -> /dev/null
+lrwx------ 1 root    root    64 Jul  5 14:57 1 -> socket:[538927]
+lrwx------ 1 root    root    64 Jul  5 14:57 2 -> socket:[538927]
+lrwx------ 1 root    root    64 Jul  5 14:57 3 -> anon_inode:[eventfd]
+lrwx------ 1 root    root    64 Jul  5 14:57 4 -> anon_inode:[eventfd]
+l-wx------ 1 root    root    64 Jul  5 14:57 6 -> pipe:[538928]
+lrwx------ 1 root    root    64 Jul  5 14:57 7 -> socket:[538934]

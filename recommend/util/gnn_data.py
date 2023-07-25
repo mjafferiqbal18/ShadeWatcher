@@ -14,6 +14,7 @@ class GnnLoader(DataBase):
 
     Processing and Preparing data for GNN model.
     """
+
     def __init__(self, args):
         super().__init__(args)
 
@@ -28,12 +29,19 @@ class GnnLoader(DataBase):
         self.exist_head = list(self.all_kg_dict.keys())
         self.exist_head_size = len(self.exist_head)
 
+        # print("KG Dict:", self.all_kg_dict)
+
         # generate sorted kg triples list: head, relation, tail, value
-        self.all_h_list, self.all_r_list, self.all_t_list, self.all_v_list = self._get_all_kg_data()
+        (
+            self.all_h_list,
+            self.all_r_list,
+            self.all_t_list,
+            self.all_v_list,
+        ) = self._get_all_kg_data()
 
     def _get_all_kg_data(self) -> tuple:
-        """Sorting knowledge graph indices to satisfy tensorflow sparse matrix operations.
-        """
+        """Sorting knowledge graph indices to satisfy tensorflow sparse matrix operations."""
+
         def _reorder_list(org_list, order):
             new_list = np.array(org_list)
             new_list = new_list[order]
@@ -52,7 +60,7 @@ class GnnLoader(DataBase):
 
         # tensorflow.sparse.softmax in GNN requires indices sorted in the canonical
         # lexicographic order, so that we sort kg triples
-        logger.info('start sorting indices in kg triples...')
+        logger.info("start sorting indices in kg triples...")
         org_h_dict = dict()
 
         for idx, h in enumerate(all_h_list):
@@ -62,7 +70,7 @@ class GnnLoader(DataBase):
             org_h_dict[h][0].append(all_t_list[idx])
             org_h_dict[h][1].append(all_r_list[idx])
             org_h_dict[h][2].append(all_v_list[idx])
-        logger.debug('reorganizing kg data done.')
+        logger.debug("reorganizing kg data done.")
 
         # sort tail for every head in sorted_h_dict
         sorted_h_dict = dict()
@@ -76,7 +84,7 @@ class GnnLoader(DataBase):
             sort_v_list = _reorder_list(org_v_list, sort_order)
 
             sorted_h_dict[h] = [sort_t_list, sort_r_list, sort_v_list]
-        logger.debug('sorting (tail,relation) in heads done')
+        logger.debug("sorting (tail,relation) in heads done")
 
         # sort head in sorted_h_dict
         od = collections.OrderedDict(sorted(sorted_h_dict.items()))
@@ -91,8 +99,8 @@ class GnnLoader(DataBase):
         assert sum(new_h_list) == sum(all_h_list)
         assert sum(new_t_list) == sum(all_t_list)
         assert sum(new_r_list) == sum(all_r_list)
-        logger.debug('sorting head done.')
-        logger.info('finish sorting indices in kg triples')
+        logger.debug("sorting head done.")
+        logger.info("finish sorting indices in kg triples")
 
         return new_h_list, new_r_list, new_t_list, new_v_list
 
@@ -116,15 +124,14 @@ class GnnLoader(DataBase):
         return all_kg_dict
 
     def _get_relational_norm_list(self, adj_list: list) -> list:
-        """Generating normalized matrices for sparse adjacency in adj_list.
-        """
+        """Generating normalized matrices for sparse adjacency in adj_list."""
 
         # Init for 1/Nt
         def _si_norm(adj):
             rowsum = np.array(adj.sum(axis=1))
             # It is reasonable for np.power(rowsum, -1).flatten() to trigger divide by zero encountered warning
             d_inv = np.power(rowsum, -1).flatten()
-            d_inv[np.isinf(d_inv)] = 0.
+            d_inv[np.isinf(d_inv)] = 0.0
             d_mat_inv = sp.diags(d_inv)
             norm_adj = d_mat_inv.dot(adj)
 
@@ -134,40 +141,45 @@ class GnnLoader(DataBase):
         def _bi_norm(adj):
             rowsum = np.array(adj.sum(axis=1))
             d_inv_sqrt = np.power(rowsum, -0.5).flatten()
-            d_inv_sqrt[np.isinf(d_inv_sqrt)] = 0.
+            d_inv_sqrt[np.isinf(d_inv_sqrt)] = 0.0
             d_mat_inv_sqrt = sp.diags(d_inv_sqrt)
             bi_norm = d_mat_inv_sqrt.dot(adj).dot(d_mat_inv_sqrt)
 
             return bi_norm.tocoo()
-        logger.info('start generating normalized adjacency matrix with {}...' .format(self.args.adj_type))
-        if self.args.adj_type == 'bi':
+
+        logger.info(
+            "start generating normalized adjacency matrix with {}...".format(
+                self.args.adj_type
+            )
+        )
+        if self.args.adj_type == "bi":
             norm_list = [_bi_norm(adj) for adj in adj_list]
-            logger.debug('generating bi-normalized adjacency matrix done.')
+            logger.debug("generating bi-normalized adjacency matrix done.")
         else:
-            logger.debug('generating si-normalized adjacency matrix done.')
+            logger.debug("generating si-normalized adjacency matrix done.")
             norm_list = [_si_norm(adj) for adj in adj_list]
-        
-        logger.info('finish generating normalized adjacency matrix.')
+
+        logger.info("finish generating normalized adjacency matrix.")
 
         return norm_list
 
     def _get_relational_adj_list(self) -> tuple:
-        """Generating sparse adjacency matrices for system entity inter_train_data & relation_dict
-        """
+        """Generating sparse adjacency matrices for system entity inter_train_data & relation_dict"""
+
         def _np_mat2sp_adj(np_mat, row_pre=0, col_pre=0):
             n_all = self.n_entity_attr
 
             # to-node interaction: A: A->B
-            a_rows = np_mat[:, 0] + row_pre # all As
-            a_cols = np_mat[:, 1] + col_pre # all Bs
+            a_rows = np_mat[:, 0] + row_pre  # all As
+            a_cols = np_mat[:, 1] + col_pre  # all Bs
 
             # must use float 1. (int 1 is not allowed)
-            a_vals = [1.] * len(a_rows)
+            a_vals = [1.0] * len(a_rows)
 
             # from-node interaction: A: B->A
             b_rows = a_cols
             b_cols = a_rows
-            b_vals = [1.] * len(b_rows)
+            b_vals = [1.0] * len(b_rows)
 
             a_adj = sp.coo_matrix((a_vals, (a_rows, a_cols)), shape=(n_all, n_all))
             b_adj = sp.coo_matrix((b_vals, (b_rows, b_cols)), shape=(n_all, n_all))
@@ -177,7 +189,7 @@ class GnnLoader(DataBase):
         adj_mat_list = []
         adj_r_list = []
 
-        logger.info('start converting graph info into sparse adjacency matrix...')
+        logger.info("start converting graph info into sparse adjacency matrix...")
         # Todo: (Optional) r_inv, k_inv are for inverse directions (e.g., ActedBy for ActorOf)
         r, r_inv = _np_mat2sp_adj(self.inter_train_data)
         adj_mat_list.append(r)
@@ -185,7 +197,9 @@ class GnnLoader(DataBase):
         # adj_mat_list.append(r_inv)
         # adj_r_list.append(self.n_relation + 1)
 
-        logger.debug('converting system interactions into sparse adjacency matrix done.')
+        logger.debug(
+            "converting system interactions into sparse adjacency matrix done."
+        )
 
         for r_id in self.relation_dict.keys():
             k, k_inv = _np_mat2sp_adj(np.array(self.relation_dict[r_id]))
@@ -194,9 +208,9 @@ class GnnLoader(DataBase):
             # adj_mat_list.append(k_inv)
             # adj_r_list.append(r_id + 1 + self.n_relation + 1)
 
-        logger.debug('converting knowledge graph into sparse adjacency matrix done.')
+        logger.debug("converting knowledge graph into sparse adjacency matrix done.")
 
-        logger.info('finish converting graph info into sparse adjacency matrix.')
+        logger.info("finish converting graph info into sparse adjacency matrix.")
 
         # n_relations = (n_relations + 1) * 2 if inverse relations are enabled
         self.n_relations = len(adj_r_list)
@@ -204,58 +218,85 @@ class GnnLoader(DataBase):
         return adj_mat_list, adj_r_list
 
     def generate_train_batch(self) -> dict:
-        """Generating training batch of system interactions for GNN.
-        """
+        """Generating training batch of system interactions for GNN."""
         batch_data = {}
         e_batch, pos_e_batch, neg_e_batch = self._generate_train_inter_batch()
-        batch_data['e_batch'] = e_batch
-        batch_data['pos_e_batch'] = pos_e_batch
-        batch_data['neg_e_batch'] = neg_e_batch
+        batch_data["e_batch"] = e_batch
+        batch_data["pos_e_batch"] = pos_e_batch
+        batch_data["neg_e_batch"] = neg_e_batch
 
         return batch_data
 
+    # new, change return tupe from dict to tuple
+    # def generate_test_batch(self, i_batch: int) -> tuple:
     def generate_test_batch(self, i_batch: int) -> dict:
-        """Generating testing batch of system interactions for GNN.
-        """
+        """Generating testing batch of system interactions for GNN."""
         batch_data = {}
         start = i_batch * self.batch_size_test
         if i_batch == self.n_batch_test - 1:
             end = self.n_test_inter
         else:
             end = (i_batch + 1) * self.batch_size_test
-        batch_data['e_batch'] = self.inter_test_e[start: end]
-        batch_data['neg_e_batch'] = self.inter_test_neg[start: end]
+        batch_data["e_batch"] = self.inter_test_e[start:end]
+        batch_data["neg_e_batch"] = self.inter_test_neg[start:end]
 
+        # # new - return ground truth for this batch as well
+        # batch_size = len(batch_data["e_batch"])
+        # gt_test_batch = [0] * batch_size
+        # gt_keys = self.gt_dict.keys()
+        # for i in range(batch_size):
+        #     e1 = batch_data["e_batch"][i]
+        #     e2 = batch_data["neg_e_batch"][i]
+        #     if e1 in gt_keys:
+        #         if e2 in self.gt_dict[e1]:
+        #             # Malicious interaction - Set gt value for this interaction to 1
+        #             gt_test_batch[i] = 1
+
+        # return batch_data, gt_test_batch
         return batch_data
 
+    # new, change return tupe from dict to tuple
+    # def generate_val_batch(self, i_batch: int) -> tuple:
     def generate_val_batch(self, i_batch: int) -> dict:
-        """Generating validating batch of system interactions for GNN.
-        """
+        """Generating validating batch of system interactions for GNN."""
         batch_data = {}
         start = i_batch * self.batch_size_val
         if i_batch == self.n_batch_val - 1:
             end = self.n_val_inter
         else:
             end = (i_batch + 1) * self.batch_size_val
-        batch_data['e_batch'] = self.inter_val_e[start: end]
-        batch_data['neg_e_batch'] = self.inter_val_neg[start: end]
+        batch_data["e_batch"] = self.inter_val_e[start:end]
+        batch_data["neg_e_batch"] = self.inter_val_neg[start:end]
 
+        # # new - return ground truth for this batch as well
+        # batch_size = len(batch_data["e_batch"])
+        # gt_val_batch = [0] * batch_size
+        # gt_keys = self.gt_dict.keys()
+        # for i in range(batch_size):
+        #     e1 = batch_data["e_batch"][i]
+        #     e2 = batch_data["neg_e_batch"][i]
+        #     if e1 in gt_keys:
+        #         if e2 in self.gt_dict[e1]:
+        #             # Malicious interaction - Set gt value for this interaction to 1
+        #             gt_val_batch[i] = 1
+
+        # return batch_data, gt_val_batch
         return batch_data
 
     def generate_train_kg_batch(self):
         """Generating training batch of system interaction for KG embedding (e.g., TransR)"""
         batch_data = {}
         h_batch, r_batch, pos_t_batch, neg_t_batch = self._generate_train_kg_batch()
-        batch_data['h_batch'] = h_batch
-        batch_data['r_batch'] = r_batch
-        batch_data['pos_t_batch'] = pos_t_batch
-        batch_data['neg_t_batch'] = neg_t_batch
+        batch_data["h_batch"] = h_batch
+        batch_data["r_batch"] = r_batch
+        batch_data["pos_t_batch"] = pos_t_batch
+        batch_data["neg_t_batch"] = neg_t_batch
 
         return batch_data
 
     def _generate_train_kg_batch(self) -> tuple:
-        """Sampling system interactions for kg training (e.g., TransR).
-        """
+        """Sampling system interactions for kg training (e.g., TransR)."""
+
         def sample_neg_triple_for_h(neg_triples):
             n_neg_triples = len(neg_triples)
             neg_id = np.random.randint(low=0, high=n_neg_triples)
@@ -276,7 +317,9 @@ class GnnLoader(DataBase):
         if self.batch_size_kg <= self.exist_head_size:
             h_batch = np.array(rd.sample(self.exist_head, self.batch_size_kg))
         else:
-            h_batch = np.array([rd.choice(self.exist_head) for _ in range(self.batch_size_kg)])
+            h_batch = np.array(
+                [rd.choice(self.exist_head) for _ in range(self.batch_size_kg)]
+            )
 
         r_batch = np.zeros(shape=[self.batch_size_kg])
         neg_t_batch = np.zeros(shape=[self.batch_size_kg])
@@ -289,55 +332,52 @@ class GnnLoader(DataBase):
             r_batch[idx] = neg_r
             neg_t_batch[idx] = neg_t
 
-            pos_t_list = sample_pos_triple_for_h(neg_triples, neg_r, self.triple_pos_rate)
+            pos_t_list = sample_pos_triple_for_h(
+                neg_triples, neg_r, self.triple_pos_rate
+            )
             for pos_idx, pos_t in enumerate(pos_t_list):
                 pos_t_batch[idx * self.triple_pos_rate + pos_idx] = pos_t
 
         return h_batch, r_batch, pos_t_batch, neg_t_batch
 
     def generate_train_feed_dict(self, model: GNN, batch_data: dict) -> dict:
-        """Generating feed dict for GNN model training.
-        """
+        """Generating feed dict for GNN model training."""
         feed_dict = {
-            model.e: batch_data['e_batch'],
-            model.pos_e: batch_data['pos_e_batch'],
-            model.neg_e: batch_data['neg_e_batch'],
-            model.mess_dropout: eval(self.args.mess_dropout)
+            model.e: batch_data["e_batch"],
+            model.pos_e: batch_data["pos_e_batch"],
+            model.neg_e: batch_data["neg_e_batch"],
+            model.mess_dropout: eval(self.args.mess_dropout),
         }
 
         return feed_dict
 
     def generate_train_kg_feed_dict(self, model: GNN, batch_data: dict) -> dict:
-        """Generating feed dict for kg embedding training
-        """
+        """Generating feed dict for kg embedding training"""
         feed_dict = {
-            model.h: batch_data['h_batch'],
-            model.r: batch_data['r_batch'],
-            model.pos_t: batch_data['pos_t_batch'],
-            model.neg_t: batch_data['neg_t_batch']
+            model.h: batch_data["h_batch"],
+            model.r: batch_data["r_batch"],
+            model.pos_t: batch_data["pos_t_batch"],
+            model.neg_t: batch_data["neg_t_batch"],
         }
         return feed_dict
 
-    def generate_test_val_feed_dict(self, model: GNN, batch_data: dict)-> dict:
-        """Generating testing and validating feed dict.
-        """
+    def generate_test_val_feed_dict(self, model: GNN, batch_data: dict) -> dict:
+        """Generating testing and validating feed dict."""
         feed_dict = {
-            model.e: batch_data['e_batch'],
-            model.neg_e: batch_data['neg_e_batch'],
-            
+            model.e: batch_data["e_batch"],
+            model.neg_e: batch_data["neg_e_batch"],
             # hardcode dropping probability
-            model.mess_dropout: [0,0,0,0,0,0]
+            model.mess_dropout: [0, 0, 0, 0, 0, 0],
         }
 
         return feed_dict
 
     @staticmethod
     def generate_test_threat_data(inter_file: str) -> dict:
-        """For evaluation: generating threat data.
-        """
+        """For evaluation: generating threat data."""
         inter_threat = np.loadtxt(inter_file, dtype=int)
         inter_size = np.size(inter_threat, 0)
-        
+
         e = np.full(inter_size, inter_threat[0][0])
         inter_e = np.zeros(shape=inter_size)
         label_e = np.zeros(shape=inter_size)
@@ -346,21 +386,19 @@ class GnnLoader(DataBase):
             label_e[idx] = inter[2]
 
         threat_data = {}
-        threat_data['e'] = e
-        threat_data['threat_e'] = inter_e
-        threat_data['label_e'] = label_e
+        threat_data["e"] = e
+        threat_data["threat_e"] = inter_e
+        threat_data["label_e"] = label_e
 
         return threat_data
 
     @staticmethod
     def generate_test_threat_feed_dict(model: GNN, threat_data: dict) -> dict:
-        """For evaluation: generating treat data feed dict.
-        """
+        """For evaluation: generating treat data feed dict."""
         feed_dict = {
-            model.e: threat_data['e'],
-            model.pos_e: threat_data['threat_e'],
-
+            model.e: threat_data["e"],
+            model.pos_e: threat_data["threat_e"],
             # hardcode dropping probability
-            model.mess_dropout: [0,0,0,0,0,0]
+            model.mess_dropout: [0, 0, 0, 0, 0, 0],
         }
         return feed_dict

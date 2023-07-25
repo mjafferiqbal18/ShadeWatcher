@@ -45,8 +45,10 @@ int main(int argc, char **argv)
 			if (cfg.storeentity) {
 				ls.EntityStoreToFile();
 			}
+			ls.StoreTrainFile();
 		}
 	}
+	ls.StoreRecommendationModelFiles();
 
 	// Graph Visualization (does not support large-scale graphs)
 	if (cfg.graph)

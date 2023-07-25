@@ -1,0 +1,22 @@
+total 0
+dr-x------ 2 root root  0 Jun 13 13:51 .
+dr-xr-xr-x 9 root root  0 Jun 13 13:51 ..
+lr-x------ 1 root root 64 Jun 13 13:51 0 -> /dev/null
+lrwx------ 1 root root 64 Jun 13 13:51 1 -> socket:[30858]
+lr-x------ 1 root root 64 Jun 13 13:51 10 -> /run/lxcfs/controllers/perf_event
+lr-x------ 1 root root 64 Jun 13 13:51 11 -> /run/lxcfs/controllers/devices
+lr-x------ 1 root root 64 Jun 13 13:51 12 -> /run/lxcfs/controllers/memory
+lr-x------ 1 root root 64 Jun 13 13:51 13 -> /run/lxcfs/controllers/net_cls,net_prio
+lr-x------ 1 root root 64 Jun 13 13:51 14 -> /run/lxcfs/controllers/pids
+lr-x------ 1 root root 64 Jun 13 13:51 15 -> /run/lxcfs/controllers/cpu,cpuacct
+lr-x------ 1 root root 64 Jun 13 13:51 16 -> /run/lxcfs/controllers/freezer
+lr-x------ 1 root root 64 Jun 13 13:51 17 -> /run/lxcfs/controllers/name=systemd
+lr-x------ 1 root root 64 Jun 13 13:51 18 -> /run/lxcfs/controllers/unified
+lrwx------ 1 root root 64 Jun 13 13:51 2 -> socket:[30858]
+lrwx------ 1 root root 64 Jun 13 13:51 3 -> /run/lxcfs.pid
+lrwx------ 1 root root 64 Jun 13 13:51 4 -> /dev/fuse
+lr-x------ 1 root root 64 Jun 13 13:51 5 -> mnt:[4026532187]
+lr-x------ 1 root root 64 Jun 13 13:51 6 -> /run/lxcfs/controllers/blkio
+lr-x------ 1 root root 64 Jun 13 13:51 7 -> /run/lxcfs/controllers/hugetlb
+lr-x------ 1 root root 64 Jun 13 13:51 8 -> /run/lxcfs/controllers/cpuset
+lr-x------ 1 root root 64 Jun 13 13:51 9 -> /run/lxcfs/controllers/rdma

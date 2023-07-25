@@ -7,4 +7,6 @@
 #include "db/neo4j.h"
 #include "db/postgresql.h"
 
+// std::unordered_map<std::string, std::string> malicious_truth_files;
+
 #endif
