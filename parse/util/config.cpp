@@ -76,7 +76,7 @@ void Config::ConfigDar()
 	if (ComOptionExist("-malicious_truth"))
 	{
 		malicious_truth = true;
-		malicious_truth_path = GetComOption("-maliciou_truth");
+		malicious_truth_path = GetComOption("-malicious_truth");
 	}
 	// ----
 

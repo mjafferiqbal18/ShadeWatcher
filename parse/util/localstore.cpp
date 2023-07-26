@@ -832,7 +832,7 @@ void LocalStore::StoreMaliciousTruthFile()
 	std::string entity_file_path = kg_path + "/maliciousTruth.txt";
 	std::ofstream entity_file(entity_file_path, std::ios::app);
 
-	if (entity_file.is_open())
+	if (!entity_file.is_open())
 	{
 		std::cerr << "Failed to open file:" << entity_file_path << std::endl;
 		return;
