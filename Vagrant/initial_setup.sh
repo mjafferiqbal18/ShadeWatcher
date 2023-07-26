@@ -33,6 +33,9 @@ sudo make -j8
 sudo make install
 cd ../
 
+# boost
+sudo apt-get install libboost-all-dev -y
+
 #compilation
 echo "Compiling ShadeWatcher"
 cd /home/vagrant/ShadeWatcher/parse/
