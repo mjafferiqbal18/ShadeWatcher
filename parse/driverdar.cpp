@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 
 	// define Local File in KG (no computation)
 	LocalStore ls(cfg.embed_data_path, infotbl);
-	// visulize in neo4j
+	// visulize in neo4j 
 	Neo4jdb neo4jdb(cfg.neo4j_config, infotbl);
 
 	// KG Construction
@@ -89,6 +89,7 @@ int main(int argc, char **argv)
 		std::unordered_map<std::string, std::string> malicious_truth_files;
 		if (cfg.malicious_truth)
 		{
+			infotbl->malicious_truth=true;
 			malicious_truth_files = CollectMaliciousTruthFiles(darpa_files, cfg.malicious_truth_path);
 		}
 		// -- -- --
