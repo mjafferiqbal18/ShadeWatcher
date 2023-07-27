@@ -58,4 +58,6 @@ event_t LineNum(std::string file_path);
 void DelteIR(ItemRepository &ir);
 void MultithreadConstruction(std::string darpa_file, KG *infotbl, Config &cfg);
 
+void ConsumerTaskMaliciousTruth(ItemRepository &ir, int dataset_type, std::unordered_map<std::string, std::string>_maliciousInteractionMap);
+
 #endif
