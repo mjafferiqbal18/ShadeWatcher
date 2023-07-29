@@ -7,9 +7,7 @@ bool fileExists(const std::string &filePath)
 }
 
 // new --
-std::unordered_map<std::string, std::string> CollectMaliciousTruthFiles(
-	const std::vector<std::string> &darpa_files,
-	const std::string &malicious_truth_path)
+std::unordered_map<std::string, std::string> CollectMaliciousTruthFiles(const std::vector<std::string> &darpa_files, const std::string &malicious_truth_path)
 {
 	std::unordered_map<std::string, std::string> malicious_files_map;
 
@@ -109,9 +107,7 @@ int main(int argc, char **argv)
 			// ----
 
 			// construct KG (work_threads shows #threads to parse dataset)
-			// std::cout << "TABLE SIZE1: " << infotbl->nodeHashToUuid.size() << "," << infotbl->ObjectInteractionTable.size() << std::endl;
 			KGConstruction(darpa_file, infotbl, cfg);
-			// std::cout << "TABLE SIZE2: " << infotbl->nodeHashToUuid.size() << "," << infotbl->ObjectInteractionTable.size() << std::endl;
 
 			// print KG information
 			infotbl->PrintKG();

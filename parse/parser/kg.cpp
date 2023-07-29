@@ -48,6 +48,7 @@ KG::~KG()
         ObjectInteractionTable.clear();
         OneHopChildCount.clear();
         SkipObjectInteractionTable.clear();
+        nodeRelationshipsMapObj.clear();
 }
 
 void KG::FreeNode()
@@ -91,7 +92,6 @@ void KG::FreeNode()
         KGNodeTable.clear();
         NoiseTable.clear();
         ObjectInteractionTable.clear();
-        nodeRelationshipsMapObj.clear();
 }
 
 void KG::FreeInteraction()
@@ -118,6 +118,7 @@ void KG::FreeInteraction()
         ProcInteractionTable.clear();
         SkipObjectInteractionTable.clear();
         OneHopChildCount.clear();
+        nodeRelationshipsMapObj.clear();
 }
 
 // new
@@ -1744,11 +1745,6 @@ void KG::FindAllObjectInteractions()
                         uint64_t minTime = UINT64_MAX;
                         visited.insert(it.first);
                         FindInteractiveEntities(it.first, NULL, it.first, 5, visited, minTime);
-
-                        if (ObjectInteractionTable[it.first])
-                        {
-                                std::vector<hash_t> interactions = (*ObjectInteractionTable[it.first]);
-                        }
                 }
         }
 }
