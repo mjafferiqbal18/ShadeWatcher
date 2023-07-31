@@ -7,7 +7,7 @@ sudo apt install python3-pip -y
 sudo apt-get install git -y 
 pip3 install gdown 
 
-git clone https://github.com/aswad546/ShadeWatcher.git 
+git clone https://github.com/mjafferiqbal18/ShadeWatcher.git
 cd ShadeWatcher/lib/
 LIB_INSTALL_PATH=$PWD
 
