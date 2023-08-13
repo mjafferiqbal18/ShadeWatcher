@@ -1610,15 +1610,13 @@ std::vector<KGEdge *> KG::FindAllChildren(hash_t p_hash, uint64_t minTime)
         // Find initial mintime if start node
         if (minTime == UINT64_MAX)
         {
-                for (auto &it : nodeRelationshipsMapObj[p_hash].children)
+                for (auto &it : nodeRelationshipsMapObj[p_hash].parents) //only checking parent edges
                 {
                         KGEdge *edge = it;
                         // Check parent edges
-                        if (edge->n2_hash == p_hash)
-                        {
-                                int64_t timestampNanos = std::stoll(edge->timestamp);
-                                if (timestampNanos < minTime)
-                                        minTime = timestampNanos;
+                        int64_t timestampNanos = std::stoll(edge->timestamp);
+                        if (timestampNanos < minTime){
+                                minTime = timestampNanos;
                         }
                 }
                 if (minTime == UINT64_MAX)
@@ -1628,15 +1626,11 @@ std::vector<KGEdge *> KG::FindAllChildren(hash_t p_hash, uint64_t minTime)
         }
 
         bool edge_missed = true;
-        for (auto &it : nodeRelationshipsMapObj[p_hash].children)
-        { // all edges
+        for (auto &it : nodeRelationshipsMapObj[p_hash].children){ //only checking children edges
                 KGEdge *edge = it;
-                if (edge->n1_hash == p_hash)
+                if (std::stoll(edge->timestamp) >= minTime)
                 {
-                        if (std::stoll(edge->timestamp) >= minTime)
-                        {
-                                childEdges.push_back(edge);
-                        }
+                        childEdges.push_back(edge);
                 }
                 else
                 {
@@ -1644,7 +1638,7 @@ std::vector<KGEdge *> KG::FindAllChildren(hash_t p_hash, uint64_t minTime)
                 }
                 // another check if all edges > min time(and p_hash is dataobject), then dont do dfs on p_hash later
         }
-        type = KGNodeTable[p_hash];
+        //type = KGNodeTable[p_hash];
         // if ((!edge_missed) && (type == NodeType_t::File)) SkipObjectInteractionTable.insert(p_hash);
         return childEdges;
 }
@@ -1653,20 +1647,15 @@ void KG::FindOneHopParents(hash_t c_hash, hash_t p_hash, hash_t prevNode)
 {
         // Add One Hop Incoming Parents
         std::vector<KGEdge *> parentEdges;
-        for (auto &it : nodeRelationshipsMapObj[p_hash].parents)
-        {
+        for (auto &it : nodeRelationshipsMapObj[c_hash].parents) { //checking parent edges of current node
                 KGEdge *edge = it;
-
-                if (edge->n2_hash == c_hash)
+                if (prevNode != NULL)
                 {
-                        if (prevNode != NULL)
-                        {
-                                if (edge->n1_hash == prevNode)
-                                        continue;
-                        }
-                        InsertObjectInteractions(p_hash, edge->n1_hash);
-                        parentEdges.push_back(edge);
+                        if (edge->n1_hash == prevNode)
+                                continue;
                 }
+                InsertObjectInteractions(p_hash, edge->n1_hash);
+                parentEdges.push_back(edge);
         }
         // Check Edges Of Parent to Exclude in DFS
         for (auto &it : parentEdges)
@@ -1701,7 +1690,7 @@ void KG::FindInteractiveEntities(hash_t startNode, hash_t prevNode, hash_t currN
         {
                 InsertObjectInteractions(startNode, edge->n2_hash);
         }
-        int count = 0;
+        //int count = 0;
         for (auto edge : childEdges)
         {
                 // Optimize here replace set with hashtable or bloomfilter for more optimized datastructure
@@ -1715,7 +1704,7 @@ void KG::FindInteractiveEntities(hash_t startNode, hash_t prevNode, hash_t currN
                 {
                         continue;
                 }
-                count++;
+                //count++;
         }
 }
 
@@ -1756,25 +1745,13 @@ void KG::InsertObjectInteractions(hash_t p_hash, hash_t child_hash)
         if (it != ObjectInteractionTable.end())
         {
                 ObjectInteractionTable[p_hash]->push_back(child_hash);
-                // std::cout << "parent already present" << std::endl;
-                // std::cout << "inserting " << child_hash << " at parent " << p_hash << std::endl;
         }
         else
         {
-                // std::cout << "new parent" << std::endl;
-                // std::cout << "inserting " << child_hash << " at parent " << p_hash << std::endl;
                 std::vector<hash_t> *interaction = new std::vector<hash_t>;
                 interaction->push_back(child_hash);
                 ObjectInteractionTable[p_hash] = interaction;
                 count++;
-                // std::cout << "size = " << ObjectInteractionTable.size() << std::endl;
-                // std::cout << "count = " << count << std::endl;
-
-                // print all keys in ObjectInteractionTable
-                // for (auto &it : ObjectInteractionTable)
-                // {
-                //         std::cout << it.first << std::endl;
-                // }
         }
 }
 
