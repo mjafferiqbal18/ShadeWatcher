@@ -429,5 +429,22 @@ void ReduceNoise::DeleteNoise()
 			infotbl->noise_num += 1;
 		}
 	}
+
+
+	if (infotbl->malicious_truth){
+		std::vector<hash_t> keysToDelete;
+		for (auto edge_pair : infotbl->maliciousEdgeTable){
+			hash_t e_hash = edge_pair.first;
+			auto it_edge = infotbl->KGEdgeTable.find(e_hash);
+			if (it_edge == infotbl->KGEdgeTable.end()){ //not found in table	
+				keysToDelete.push_back(e_hash);			
+			}
+		}
+		
+		for (const auto& key : keysToDelete) {
+        delete infotbl->maliciousEdgeTable[key];}
+		for (const auto& key : keysToDelete) {
+        infotbl->maliciousEdgeTable.erase(key);}
+	}
 	OverheadEnd(start, "Reduce Noise Events");
 }

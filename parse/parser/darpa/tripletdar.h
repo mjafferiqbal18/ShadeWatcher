@@ -16,6 +16,9 @@ public:
 	event_t event_analyzed;
 	std::unordered_map <std::string, SyscallType_t> syscallMap;
 
+	std::vector<std::string> subjobj;
+	std::vector<std::string> objsubj;
+
 	Triplet(const Json::Value &, KG *, int);
 	~Triplet();
 	

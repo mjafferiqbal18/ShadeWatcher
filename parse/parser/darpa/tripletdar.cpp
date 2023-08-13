@@ -29,6 +29,27 @@ Triplet::Triplet(const Json::Value &_event, KG *_infotbl, int _dataset_type) : e
 	syscallMap["EVENT_LOADLIBRARY"] = SyscallType_t::Load;
 	syscallMap["EVENT_CREATE_OBJECT"] = SyscallType_t::Create;
 	syscallMap["EVENT_UPDATE"] = SyscallType_t::Update;
+
+	subjobj = {
+        "EVENT_CLONE",
+        "EVENT_FORK",
+        "EVENT_EXECUTE",
+        "EVENT_CONNECT",
+        "EVENT_UNLINK",
+        "EVENT_WRITE",
+        "EVENT_SENDTO",
+        "EVENT_SENDMSG",
+        "EVENT_WRITE_SOCKET_PARAMS",
+        "EVENT_CREATE_OBJECT"
+    };
+
+    objsubj = {
+        "EVENT_READ",
+        "EVENT_RECVFROM",
+        "EVENT_RECVMSG",
+        "EVENT_READ_SOCKET_PARAMS",
+        "EVENT_LOADLIBRARY"
+    };
 }
 
 Triplet::~Triplet()
@@ -64,8 +85,43 @@ void Triplet::Event2triplet()
 		auto mal_uuid = infotbl->maliciousInteractionMap.find(uuid);
 		if (mal_uuid != infotbl->maliciousInteractionMap.end())
 		{ // if event is malicious
-			KGEdge *e = new KGEdge(sub_id, obj_id, EdgeType_t::NotDefined, seq, sess, e_id, timestamp);
-			infotbl->InsertMaliciousEdge(e_id, e);
+			auto it1 = std::find(subjobj.begin(), subjobj.end(), syscall_str);
+			auto it2 = std::find(objsubj.begin(), objsubj.end(), syscall_str);
+
+			if (it1!=subjobj.end()){
+				KGEdge *e = new KGEdge(sub_id, obj_id, EdgeType_t::NotDefined, seq, sess, e_id, timestamp);
+				infotbl->InsertMaliciousEdge(e_id, e);
+			}
+			else if (it2!=objsubj.end()){	
+				KGEdge *e = new KGEdge(obj_id, sub_id, EdgeType_t::NotDefined, seq, sess, e_id, timestamp);
+				infotbl->InsertMaliciousEdge(e_id, e);
+			}
+			else if (syscall_str == "EVENT_RENAME"){
+				std::string obj2 = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["predicateObject2"]["com.bbn.tc.schema.avro.cdm18.UUID"]);
+				std::hash<std::string> hasher;
+        		hash_t obj2_id = (hash_t)hasher(obj2);
+        		std::string sess_str = std::to_string(sess);
+				hash_t e1_id = (hash_t)hasher(sess_str + obj);
+        		hash_t e2_id = (hash_t)hasher(sess_str + obj2);
+				KGEdge *e1 = new KGEdge(obj_id, sub_id, EdgeType_t::Read, seq, sess, e1_id, timestamp);
+				KGEdge *e2 = new KGEdge(sub_id, obj2_id, EdgeType_t::Write, seq, sess, e2_id, timestamp);
+				infotbl->InsertMaliciousEdge(e_id, e1);
+				infotbl->InsertMaliciousEdge(e_id, e2);
+			}
+			else if (syscall_str == "EVENT_UPDATE"){
+				std::string obj2 = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["predicateObject2"]["com.bbn.tc.schema.avro.cdm18.UUID"]);
+				std::hash<std::string> hasher;
+				hash_t obj2_id = (hash_t)hasher(obj2);
+				std::string sess_str = std::to_string(sess);
+				// sess string with obj to make up a new edge id
+				hash_t e1_id = (hash_t)hasher(sess_str + obj);
+				hash_t e2_id = (hash_t)hasher(sess_str + obj2);
+				KGEdge *e1 = new KGEdge(obj_id, sub_id, EdgeType_t::Delete, seq, sess, e1_id, timestamp);
+				KGEdge *e2 = new KGEdge(sub_id, obj2_id, EdgeType_t::Create, seq, sess, e2_id, timestamp);
+				infotbl->InsertMaliciousEdge(e_id, e1);
+				infotbl->InsertMaliciousEdge(e_id, e2);
+			}
+			
 		}
 	}
 
