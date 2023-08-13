@@ -18,6 +18,7 @@ public:
     nodenum_t file_num;
     event_t edge_num;
     nodemap node_map;
+    nodemap new_node_map;
 
     int numTrainLines = 0;
 
@@ -33,6 +34,10 @@ public:
     void StoreTrainFile();
     void StoreRecommendationModelFiles();
     void SetNodeMap();
+
+    void AppendNodeMap(int);
+    void AppendEntityFile();
+    void StoreEntityFileChecker();
     // store KG to local files
     void KGStoreToFile(int = 0);
 

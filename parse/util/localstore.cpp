@@ -475,6 +475,7 @@ void LocalStore::StoreEntityFile()
 	int64_t totalNodes = infotbl->KGNodeTable.size();
 	std::string entity_file_path = kg_path + "/entity2id.txt";
 	std::ofstream entity_file(entity_file_path, std::ios::app);
+
 	if (!entity_file.is_open())
 	{
 		std::cerr << "Fail to open file:" << entity_file_path << std::endl;
@@ -488,6 +489,104 @@ void LocalStore::StoreEntityFile()
 
 	entity_file.close();
 }
+
+void LocalStore::AppendNodeMap(int numExistingNodes)
+{
+	new_node_map.clear();
+	int node_id = numExistingNodes;
+	for (auto node : infotbl->KGNodeTable)
+	{
+		hash_t id = node.first;
+		auto it = node_map.find(id);
+		if (it == node_map.end()) //if not found in node_map
+		{
+			node_map[id] = node_id;
+			new_node_map[id] = node_id;
+			node_id++;
+		}
+	}
+}
+
+void LocalStore::AppendEntityFile()
+{
+	std::string entity_file_path = kg_path + "/entity2id.txt";
+	std::ifstream entity_file(entity_file_path);
+	if (!entity_file.is_open())
+	{
+		std::cerr << "Fail to open file:" << entity_file_path << std::endl;
+		return;
+	}
+
+	int numExistingNodes;
+    if (entity_file >> numExistingNodes) {// The first line was successfully read and converted to an integer.
+        hash_t currHash;
+        int64_t currEncoding;
+		node_map.clear();
+        while (entity_file >> currHash >> currEncoding) {// Read and parse the remaining lines
+			auto n_it = infotbl->KGNodeTable.find(currHash); 
+			if (n_it != infotbl->KGNodeTable.end()) { //if it exists in node table then update nodemap
+				node_map[currHash]=currEncoding;
+			}
+        }
+		entity_file.close();
+		int newTotalNodes = numExistingNodes+(infotbl->KGNodeTable.size()-node_map.size());
+		//now rewrite the first line:
+		std::ofstream entity_file_out(entity_file_path);
+		if (!entity_file_out.is_open()) {
+            std::cerr << "Failed to open file for writing: " << entity_file_path << std::endl;
+            return;
+        }
+        // Write the new first line value.
+        entity_file_out << newTotalNodes << std::endl;
+		entity_file_out.close();
+		AppendNodeMap(numExistingNodes);
+
+		std::ofstream entity_file_out_2(entity_file_path, std::ios::app);	
+		if (!entity_file_out_2.is_open()) {
+            std::cerr << "Failed to open file for writing in append mode: " << entity_file_path << std::endl;
+            return;
+        }
+
+		for (auto node : new_node_map) 
+		{
+			entity_file_out_2 << node.first << " " << node.second << std::endl;
+		}
+		entity_file_out_2.close();
+		new_node_map.clear();
+
+    } else {
+        // Failed to read the first line or it was not a valid integer.
+        std::cerr << "Failed to read the number of existing nodes from the file." << std::endl;
+		entity_file.close();
+		StoreEntityFile();
+    }
+}
+
+void LocalStore::StoreEntityFileChecker()
+{
+	std::string entity_file_path = kg_path + "/entity2id.txt";
+	std::ofstream entity_file(entity_file_path, std::ios::app);
+
+	if (!entity_file.is_open())
+	{
+		std::cerr << "Fail to open file: " << entity_file_path << std::endl;
+		return;
+	}
+
+	// Check if the file is empty
+	entity_file.seekp(0, std::ios::end);
+	if (entity_file.tellp() == 0) //if empty
+	{
+		entity_file.close(); //close decriptor
+		StoreEntityFile();
+	}
+	else
+	{
+		entity_file.close(); //close decriptor
+		AppendEntityFile();
+	}
+}
+
 
 void LocalStore::StoreInteractionFile()
 {
@@ -677,8 +776,10 @@ void LocalStore::StoreRecommendationModelFiles()
 	auto start = OverheadStart();
 	std::cout << "Storing nodeHashtoUuid file\n";
 	StoreNodeHashToUuidFile();
+
 	std::cout << "Storing entity2id.txt file\n";
-	StoreEntityFile();
+	//StoreEntityFile();
+	StoreEntityFileChecker();
 	std::cout << "Storing relation2id.txt file\n";
 	StoreRelationFile();
 	std::cout << "Storing inter2id.txt file\n";
