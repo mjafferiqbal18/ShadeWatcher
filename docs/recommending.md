@@ -15,6 +15,7 @@ recommendation model under  `ShadeWatcher/recommend`.
 1. Show usage or help
 ```bash
 workon shadewatcher
+(IF setup through Vagrantfile, use "source /home/vagrant/.virtualenvs/shadewatcher/bin/activate" to activate the virtual env)
 (shadewatcher) python driver.py -h
 ```
 ```bash

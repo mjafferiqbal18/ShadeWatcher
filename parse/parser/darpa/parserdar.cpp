@@ -42,7 +42,7 @@ void KGDarpaParse(std::string darpa_file, KG *infotbl, int dataset_type)
 	int batchDeal = 0;
 #endif
 
-	int count = 0;
+	// int count = 0;
 	for (event_t id = 0; id < event_num; id++)
 	{
 // Progress bar: high overhead (0.71s -> 0.93s)
