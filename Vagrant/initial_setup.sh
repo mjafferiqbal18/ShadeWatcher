@@ -110,9 +110,20 @@ echo "Activating virtual environment"
 echo "Installing packages..."
 
 # TensorFlow
+# Download tensorflow dependencies separately to avoid the gcrpio dependency.
+pip install tensorflow_gpu==1.14 --no-deps
 pip install protobuf==3.6.1
-pip install --upgrade Cython
-pip install tensorflow_gpu==1.14
+pip install wrapt
+pip install termcolor
+pip install keras_applications
+pip install keras_preprocessing
+pip install tensorflow_estimator==1.14.0
+pip install dataclasses
+pip install importlib-metadata
+pip install Markdown
+pip install absl-py
+pip install gast
+pip install astor
 
 # Numpy
 pip install numpy==1.19.2
