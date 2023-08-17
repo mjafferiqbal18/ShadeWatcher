@@ -35,7 +35,7 @@ git clone https://github.com/mjafferiqbal18/ShadeWatcher.git
 cd ShadeWatcher/lib/
 LIB_INSTALL_PATH=$PWD
 
-# PARSER
+# Parser Setup
 
 #neo 4j
 check_command_with_retries sudo add-apt-repository ppa:cleishm/neo4j -y 
@@ -84,10 +84,10 @@ cd /home/vagrant/ShadeWatcher/parse/
 sudo make
 
 sudo cp /home/vagrant/ShadeWatcher/lib/libconfig-1.7.2/lib/.libs/libconfig++.so.11 /usr/lib
-sudo chown -R vagrant:vagrant /home/
 sudo mkdir -p /home/vagrant/ShadeWatcher/data/encoding/e3_trace
+chmod +x compiler.sh
 
-# Recommendation Model setup
+# Recommendation Model Setup
 
 # Install Python virtualenv
 check_command_with_retries sudo apt-get install python3-venv -y
@@ -142,5 +142,9 @@ pip install colorlog
 
 # Deactivate the virtual environment
 deactivate
+
+# Give vagrant user full access
+cd /home/vagrant
+sudo chown -R vagrant:vagrant /home/
 
 echo "Provisioning completed."
