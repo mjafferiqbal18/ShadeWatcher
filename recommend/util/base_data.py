@@ -51,8 +51,13 @@ class DataBase(object):
         self.val_size = args.val_size
         self.inter_file = self._traverse_inter_file(args.ignore_inter)
         self.no_test = args.no_test
+        self.mal_gt = args.ground_truth_given
+
         # new
-        self.gt_file = self.path + "/maliciousTruth.txt"
+        if self.mal_gt:
+            self.gt_file = self.path + "/maliciousTruth.txt"
+            # new - load ground truth
+            self.gt_dict = self._load_gt()
 
         # system entity interactions for gnn
         self.n_inter = 0
@@ -60,9 +65,6 @@ class DataBase(object):
         inter_data, self.inter_dict = self._load_ratings()
         self.exist_entity = list(self.inter_dict.keys())
         self.exist_entity_size = len(self.exist_entity)
-
-        # new - load ground truth
-        # self.gt_dict = self._load_gt()
 
         # split inter_data into training data, validation data, and testing data
         self.n_train_inter, self.n_test_inter, self.n_val_inter = 0, 0, 0
@@ -97,7 +99,7 @@ class DataBase(object):
         self.n_batch_test, self.n_batch_val = 0, 0
         self.inter_val_e, self.inter_val_neg = self._get_val_data(inter_val_data)
         # self.inter_test_e, self.inter_test_neg  = self._get_test_data(inter_test_data)
-        if self.no_test == False:  # if no test then
+        if self.no_test == False:  # if test then
             self.inter_test_e, self.inter_test_neg = self._get_test_data(
                 inter_test_data
             )
@@ -131,20 +133,31 @@ class DataBase(object):
 
     def _train_test_split(self, inter_data: np.array) -> tuple:
         """Splitting interaction data into training, validating, and testing parts."""
-        inter_train_data, inter_test_val_data = train_test_split(
-            inter_data, test_size=self.test_size + self.val_size, random_state=2021
-        )
 
-        # new - check for malicious interactions in train data
-        # inter_train_data, inter_test_val_data = self._ensure_benign_train(
-        #     inter_train_data, inter_test_val_data
-        # )
+        # new - check for malicious interactions in train and val data
+        if self.mal_gt:
+            inter_train_val_data, inter_test_data = train_test_split(
+                inter_data, test_size=self.test_size, random_state=2021
+            )
+            inter_train_val_data, inter_test_data = self._ensure_benign_train(
+                inter_train_val_data, inter_test_data
+            )
 
-        inter_test_data, inter_val_data = train_test_split(
-            inter_test_val_data,
-            test_size=self.val_size / (self.test_size + self.val_size),
-            random_state=2021,
-        )
+            inter_train_data, inter_val_data = train_test_split(
+                inter_train_val_data,
+                test_size=self.val_size / (1 - self.test_size),
+                random_state=2021,
+            )
+        else:
+            inter_train_data, inter_test_val_data = train_test_split(
+                inter_data, test_size=self.test_size + self.val_size, random_state=2021
+            )
+            inter_test_data, inter_val_data = train_test_split(
+                inter_test_val_data,
+                test_size=self.val_size / (self.val_size + self.test_size),
+                random_state=2021,
+            )
+
         self.n_train_inter = len(inter_train_data)
         self.n_test_inter = len(inter_test_data)
         self.n_val_inter = len(inter_val_data)
@@ -213,7 +226,9 @@ class DataBase(object):
             return rd
 
         # kg_np = np.loadtxt(self.kg_file, dtype=np.int64, skiprows=1)
-        kg_np = np.loadtxt(self.kg_file, dtype=np.int64)  # new file wont have num lines stored at top
+        kg_np = np.loadtxt(
+            self.kg_file, dtype=np.int64
+        )  # new file wont have num lines stored at top
         kg_np = np.unique(kg_np, axis=0)
         relation_dict = _construct_kg(kg_np)
         # print("Relation Dict:", relation_dict)
@@ -334,7 +349,7 @@ class DataBase(object):
         return e_batch, pos_batch, neg_batch
 
     # new - load gt
-    def _load_gt(self) -> collections.defaultdict:
+    def _load_gt(self) -> dict:
         """Loading Ground Truth File"""
         gt_dict = dict()
         f = open(self.gt_file, "r")
@@ -354,44 +369,64 @@ class DataBase(object):
                 gt_dict[e1] = exist_inters
         f.close()
         # Dont need to check for repititions
+        return gt_dict
 
     # new - swap out any malicious interactions from train data
-    def _ensure_benign_train(self, inter_train_data, inter_test_val_data) -> tuple:
+    def _ensure_benign_train(self, inter_train_val_data, inter_test_data) -> tuple:
         # Get malicious interactions from train data
         train_mal_inters = []
+        malicious_indexes = []
         gt_keys = self.gt_dict.keys()
-        for idx, inter in enumerate(inter_train_data):
+        for idx, inter in enumerate(inter_train_val_data):
             e1 = inter[0]
             e2 = inter[1]
             if e1 in gt_keys:
                 if e2 in self.gt_dict[e1]:
                     # malicious interaction - remove from train data
-                    mal_inter = inter_train_data.pop(idx)
+                    mal_inter = inter_train_val_data[idx]
                     train_mal_inters.append(mal_inter)
+                    malicious_indexes.append(idx)
+
+        inter_train_val_data = np.delete(
+            inter_train_val_data, malicious_indexes, axis=0
+        )
 
         ben_inters = []
+        ben_indexes = []
         inters_needed = len(train_mal_inters)
-        num_items = len(inter_test_val_data)
+        num_items = len(inter_test_data)
         for i in range(inters_needed):
-            while 1:
-                # Assume benign data is big enough that randomly picking yields a benign interaction efficienly
+            while True:
+                # Assume benign data is big enough that randomly picking yields a benign interaction efficiently
                 r_idx = rd.randrange(num_items)
-                tmp_inter = inter_test_val_data[r_idx]
+                while r_idx in ben_indexes:
+                    r_idx = rd.randrange(num_items)
+
+                tmp_inter = inter_test_data[r_idx]
                 e1 = tmp_inter[0]
                 e2 = tmp_inter[1]
                 if e1 not in gt_keys:
-                    inter_test_val_data.pop(r_idx)
-                    num_items -= 1
+                    # inter_test_val_data.pop(r_idx)
+                    # inter_test_data = np.delete(inter_test_data, r_idx, axis=0)
+                    # num_items -= 1
                     ben_inters.append(tmp_inter)
+                    ben_indexes.append(r_idx)
                     break
                 elif e2 not in self.gt_dict[e1]:
-                    inter_test_val_data.pop(r_idx)
-                    num_items -= 1
+                    # inter_test_val_data.pop(r_idx)
+                    # inter_test_data = np.delete(inter_test_data, r_idx, axis=0)
+                    # num_items -= 1
                     ben_inters.append(tmp_inter)
+                    ben_indexes.append(r_idx)
                     break
                 else:
                     continue
+        inter_test_data = np.delete(inter_test_data, ben_indexes, axis=0)
 
-        inter_train_data.extend(ben_inters)
-        inter_test_val_data.extend(train_mal_inters)
-        return inter_train_data, inter_test_val_data
+        inter_train_val_data = np.concatenate(
+            (inter_train_val_data, ben_inters), axis=0
+        )
+
+        inter_test_data = np.concatenate((inter_test_data, train_mal_inters), axis=0)
+
+        return inter_train_val_data, inter_test_data

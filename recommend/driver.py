@@ -42,6 +42,12 @@ def main() -> None:
     logger.warning("Loading dataset")
     meta_data = MetaData(args.dataset)
     data_generator = load_data_engine(args, meta_data)
+    
+    print("NUM GNN BATCHES:", data_generator.n_train_inter // args.batch_size_gnn + 1)
+    print(
+        "NUM KGEmbed BATCHES:", len(data_generator.all_h_list) // args.batch_size_kg + 1
+    )
+    
     logger.warning("Dataset")
     # Load pre-trained kg embeddings
     pretrain_embedding = None
@@ -113,7 +119,9 @@ def main() -> None:
 
         # Report pre-trained model performance
         if args.report:
-            rel_stat = test(sess, model, data_generator, args.threshold)
+            rel_stat = test(
+                sess, model, data_generator, args.threshold, args.ground_truth_given
+            )
             logger.info("test pre-trained model:")
             for metrics, value in rel_stat.items():
                 logger.info("metrics: {}, value: {}".format(metrics, value))
@@ -215,11 +223,6 @@ def main() -> None:
         if args.show_val:
             t2 = time()
             rel = validation(sess, model, data_generator, args.threshold)
-            # new - added remaining metrics
-            # perf_val_benign = (
-            #     "validation==[[%.1fs] tn_b: %d, fp_b: %d, tp_m: %d, fn_m: %d]"
-            #     % (time() - t2, rel["tn_b"], rel["fp_b"], rel["tp_m"], rel["fn_m"])
-            # )
             perf_val_benign = "validation==[[%.1fs] tn_b: %d, fp_b: %d]" % (
                 time() - t2,
                 rel["tn_b"],
@@ -243,10 +246,13 @@ def main() -> None:
                         )
                 if should_stop:
                     break
+                
     if args.no_test == False:
         # Testing Phase
         if args.show_test:
-            rel_stat = test(sess, model, data_generator, args.threshold)
+            rel_stat = test(
+                sess, model, data_generator, args.threshold, args.ground_truth_given
+            )
             logger.info("test model:")
             for metrics, value in rel_stat.items():
                 logger.info("metrics: {}, value: {}".format(metrics, value))

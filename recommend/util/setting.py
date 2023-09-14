@@ -46,6 +46,8 @@ def parse_args() -> argparse.Namespace:
                         help='ratio of positive and negative entities in interactions')
     parser.add_argument('--triple_pos_rate', type=int, default=2,
                         help='ratio of positive and negative entities in embedding')
+    parser.add_argument('--ground_truth_given', default=False, action='store_true',
+                        help='whether maliciousTruth ground truth file will be given to the model')
 
     # setting for model
     parser.add_argument('--pretrain', type=int, default=0,

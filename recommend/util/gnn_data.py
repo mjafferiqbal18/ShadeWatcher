@@ -240,47 +240,34 @@ class GnnLoader(DataBase):
         batch_data["e_batch"] = self.inter_test_e[start:end]
         batch_data["neg_e_batch"] = self.inter_test_neg[start:end]
 
-        # # new - return ground truth for this batch as well
-        # batch_size = len(batch_data["e_batch"])
-        # gt_test_batch = [0] * batch_size
-        # gt_keys = self.gt_dict.keys()
-        # for i in range(batch_size):
-        #     e1 = batch_data["e_batch"][i]
-        #     e2 = batch_data["neg_e_batch"][i]
-        #     if e1 in gt_keys:
-        #         if e2 in self.gt_dict[e1]:
-        #             # Malicious interaction - Set gt value for this interaction to 1
-        #             gt_test_batch[i] = 1
-
-        # return batch_data, gt_test_batch
+        if self.mal_gt:
+            # new - return ground truth for this batch as well
+            batch_size = len(batch_data["e_batch"])
+            gt_test_batch = [0] * batch_size
+            gt_keys = self.gt_dict.keys()
+            for i in range(batch_size):
+                e1 = batch_data["e_batch"][i]
+                e2 = batch_data["neg_e_batch"][i]
+                if e1 in gt_keys:
+                    if e2 in self.gt_dict[e1]:
+                        # Malicious interaction - Set gt value for this interaction to 1
+                        gt_test_batch[i] = 1
+            return batch_data, gt_test_batch
         return batch_data
 
-    # new, change return tupe from dict to tuple
-    # def generate_val_batch(self, i_batch: int) -> tuple:
     def generate_val_batch(self, i_batch: int) -> dict:
         """Generating validating batch of system interactions for GNN."""
         batch_data = {}
         start = i_batch * self.batch_size_val
+
         if i_batch == self.n_batch_val - 1:
             end = self.n_val_inter
         else:
             end = (i_batch + 1) * self.batch_size_val
+
         batch_data["e_batch"] = self.inter_val_e[start:end]
         batch_data["neg_e_batch"] = self.inter_val_neg[start:end]
 
-        # # new - return ground truth for this batch as well
-        # batch_size = len(batch_data["e_batch"])
-        # gt_val_batch = [0] * batch_size
-        # gt_keys = self.gt_dict.keys()
-        # for i in range(batch_size):
-        #     e1 = batch_data["e_batch"][i]
-        #     e2 = batch_data["neg_e_batch"][i]
-        #     if e1 in gt_keys:
-        #         if e2 in self.gt_dict[e1]:
-        #             # Malicious interaction - Set gt value for this interaction to 1
-        #             gt_val_batch[i] = 1
-
-        # return batch_data, gt_val_batch
         return batch_data
 
     def generate_train_kg_batch(self):
