@@ -1,23 +1,28 @@
 # ShadeWatcher
-## Environment
-ShadeWatcher runs on the 16.04.3 LTS Ubuntu Linux 64-bit distribution. You
-should install this distro before proceeding.
 
 ## Installation
-* [audit setup](docs/audit_setup.md)
-   
-* [parser setup](docs/parser_setup.md)
 
-* [recommendation setup](docs/recommendation_setup.md)
+Please use this [vagrant script](Vagrant) to setup the Ubuntu VM to use ShadeWatcher
 
-## Usage
-* [auditing](docs/auditing.md) 
+## Demo
 
-* [parsing](docs/parsing.md)
+The parser is setup such that it expects to receive a path to the folder containing the TRACE files and a path to a folder that contain the ground_truth files. The g.t files are only needed for corresponding attack files (so, if parsing the whole TRACE E3 dataset, the g.t folder should contain 3 files with the following naming convention: ta1-trace-e3-official.json.XXX_malicious_truth.txt). For context and testing purposes, a (partially accurate) ground truth file has been provided [here](ground_truth) (Try and run a single file, ta1-trace-e3-official.json.125, along with this)
 
-* [recommending](docs/recommending.md)
+Inside the VM:
 
-## DATASET
-* [DARPA Transparent Computing DATASET](https://drive.google.com/drive/folders/1QlbUFWAGq3Hpl8wVdzOdIoZLFxkII4EK)
+Run the parser, adjust the paths to the dataset, the ground truth, and the number of threads as necessary.
 
-* Examples: We prepare two example of audit data under `data/examples`.
+```
+cd ShadeWatcher/parse
+./driverdar -dataset e3_trace -trace ../trace_jsons/ -malicious_truth ../ground_truth/ -multithread 20
+```
+
+Run the model.
+
+```
+cd ../recommend
+source /home/vagrant/.virtualenvs/shadewatcher/bin/activate
+python driver.py --dataset e3_trace --epoch 5 --ground_truth_given --show_test --show_val
+```
+
+More details on what the setup is based on can be found in the readme of the original repository [here](https://github.com/jun-zeng/ShadeWatcher)
