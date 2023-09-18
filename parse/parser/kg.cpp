@@ -49,6 +49,9 @@ KG::~KG()
         OneHopChildCount.clear();
         SkipObjectInteractionTable.clear();
         nodeRelationshipsMapObj.clear();
+        maliciousEdgeTable.clear();
+        maliciousInteractionMap.clear();
+        nodeHashToUuid.clear();
 }
 
 void KG::FreeNode()
@@ -92,6 +95,7 @@ void KG::FreeNode()
         KGNodeTable.clear();
         NoiseTable.clear();
         ObjectInteractionTable.clear();
+        FreeMaliciousTable();
 }
 
 void KG::FreeInteraction()
@@ -124,12 +128,11 @@ void KG::FreeInteraction()
 // new
 void KG::FreeMaliciousTable()
 {
-        for (auto it : maliciousEdgeTable)
+        for (auto &it : maliciousEdgeTable)
         {
-                delete (it.second);
+                delete it.second;
         }
         maliciousEdgeTable.clear();
-        maliciousInteractionMap.clear();
 }
 
 NodeProc *KG::SearchProc(hash_t _id)
@@ -192,8 +195,7 @@ NodeAttr *KG::SearchAttr(hash_t _id)
         }
 }
 
-void KG::
-    InsertNode(hash_t _id, NodeType_t type)
+void KG::InsertNode(hash_t _id, NodeType_t type)
 {
         KGNodeTable[_id] = type;
 }

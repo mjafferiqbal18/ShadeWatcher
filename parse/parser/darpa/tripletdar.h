@@ -27,23 +27,23 @@ public:
 	void LoadSock();
 
 	void Event2triplet();
-	void SyscallClone(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallExecve(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallOpen(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallRead(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallWrite(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallRecvfrom(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallSendto(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallConnect(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallDelete(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallRename(seq_t, sess_t, hash_t, hash_t, std::string, std::string, std::string);
-	void SyscallSendmsg(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallRecvmsg(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallSend(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallRecv(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallLoad(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallCreate(seq_t, sess_t, hash_t, hash_t, hash_t, std::string);
-	void SyscallUpdate(seq_t, sess_t, hash_t, hash_t, std::string, std::string, std::string);
+	void SyscallClone(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallExecve(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallOpen(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallRead(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallWrite(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallRecvfrom(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallSendto(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallConnect(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallDelete(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallRename(seq_t, sess_t, hash_t, hash_t, std::string, std::string, std::string, std::string);
+	void SyscallSendmsg(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallRecvmsg(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallSend(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallRecv(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallLoad(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallCreate(seq_t, sess_t, hash_t, hash_t, hash_t, std::string, std::string);
+	void SyscallUpdate(seq_t, sess_t, hash_t, hash_t, std::string, std::string, std::string, std::string);
 };
 
 #endif

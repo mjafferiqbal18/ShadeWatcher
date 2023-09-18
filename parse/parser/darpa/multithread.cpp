@@ -133,37 +133,6 @@ void ConsumerTask(ItemRepository &ir, int dataset_type)
     }
 }
 
-// this function is used to parse batch and construct subKGgraph, then store it in graph buffer
-void ConsumerTaskMaliciousTruth(ItemRepository &ir, int dataset_type,std::unordered_map<std::string, std::string>_maliciousInteractionMap)
-{
-    while (1)
-    {
-        Batch batch;
-        // use lock to ensure only one thread visits the batch buffer
-        std::unique_lock<std::mutex> lock(ir.batch_counter_mtx);
-        // after parsing all batch, exit
-        if (ir.batch_counter < ir.batch_num)
-        {
-            std::swap(batch, ConsumeBatch(ir));
-            ir.batch_counter += 1;
-        }
-        else
-        {
-            break;
-        }
-
-        lock.unlock();
-
-        // construct subKGgraph with one batch
-        KG *infotbl = new KG(darpa);
-        infotbl->malicious_truth = true;
-        infotbl->maliciousInteractionMap = _maliciousInteractionMap;
-        SubKGConstruction(infotbl, batch, dataset_type);
-        // Batch().swap(batch);
-        ProduceGraph(ir, infotbl);
-    }
-}
-
 // store one subGraph into graph buffer
 void ProduceGraph(ItemRepository &ir, KG *infotbl)
 {
@@ -385,12 +354,7 @@ void MultithreadConstruction(std::string darpa_file, KG *infotbl, Config &cfg)
     thread_vector.push_back(std::thread(ProduceBatchTask, std::ref(ir), darpa_file));
     for (thread_t i = 0; i < cfg.work_threads; i++)
     {
-        if (infotbl->malicious_truth){
-            thread_vector.push_back(std::thread(ConsumerTaskMaliciousTruth, std::ref(ir), cfg.dataset_type,infotbl->maliciousInteractionMap));   
-        }
-        else{
-            thread_vector.push_back(std::thread(ConsumerTask, std::ref(ir), cfg.dataset_type));
-        }
+        thread_vector.push_back(std::thread(ConsumerTask, std::ref(ir), cfg.dataset_type));
     }
     thread_vector.push_back(std::thread(ConsumeGraphTask, std::ref(ir), infotbl));
     for (auto &_thread : thread_vector)
@@ -398,6 +362,24 @@ void MultithreadConstruction(std::string darpa_file, KG *infotbl, Config &cfg)
         _thread.join();
     }
     DelteIR(ir);
+
+    // new
+    if (infotbl->malicious_truth)
+    {
+        std::cout << "Finding Malicious Edges\n";
+        for (auto it : infotbl->KGEdgeTable)
+        {
+            KGEdge *edge = it.second;
+            auto mal_uuid = infotbl->maliciousInteractionMap.find(edge->uuid_org);
+            if (mal_uuid != infotbl->maliciousInteractionMap.end())
+            {
+                // edge is malicious
+                //  Create a new edge
+                KGEdge *edge_mal = new KGEdge(edge->n1_hash, edge->n2_hash, edge->relation, edge->seq, edge->sess, edge->e_id, edge->timestamp, edge->uuid_org);
+                infotbl->InsertMaliciousEdge(edge->e_id, edge_mal);
+            }
+        }
+    }
 
     // Reduce noise:
     // comment the following two lines to do the stat without noise reduction

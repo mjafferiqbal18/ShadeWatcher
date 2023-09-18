@@ -14,9 +14,11 @@ public:
 	hash_t n1_hash;
 	hash_t n2_hash;
 	std::string timestamp;
+	std::string uuid_org; //new
 
 	KGEdge(hash_t *, hash_t *, EdgeType_t, seq_t, sess_t, std::string);
 	KGEdge(hash_t, hash_t, EdgeType_t, seq_t, sess_t, hash_t, std::string);
+	KGEdge(hash_t, hash_t, EdgeType_t, seq_t, sess_t, hash_t, std::string, std::string); //new
 };
 
 #endif

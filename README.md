@@ -9,7 +9,7 @@ Please use this [vagrant script](Vagrant) to setup the Ubuntu VM to use ShadeWat
 The parser is setup such that it expects to receive a path to the folder containing the TRACE files and a path to a folder that contain the ground_truth files. The g.t files are only needed for corresponding attack files (so, if parsing the whole TRACE E3 dataset, the g.t folder should contain 3 files with the following naming convention: ta1-trace-e3-official.json.XXX_malicious_truth.txt). For context and testing purposes, a (partially accurate) ground truth file has been provided [here](ground_truth) (Try and run a single file, ta1-trace-e3-official.json.125, along with this)
 
 Inside the VM:
-
+Ensure the encoding directory (ShadeWatcher/data/encoding/e3_trace) is clean.
 Run the parser, adjust the paths to the dataset, the ground truth, and the number of threads as necessary.
 
 ```

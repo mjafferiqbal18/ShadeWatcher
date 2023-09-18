@@ -1,6 +1,6 @@
-# ShadeWatcher Parser Vagrant Setup
+# ShadeWatcher Vagrant Setup
 
-This directory contains the Vagrant file for automatically setting up the ShadeWatcher Parser.
+This directory contains the Vagrant file for automatically setting up ShadeWatcher.
 
 ## Usage
 
