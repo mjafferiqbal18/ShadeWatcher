@@ -79,6 +79,52 @@ void Triplet::Event2triplet()
 	hash_t obj_id = (hash_t)hasher(obj);
 	hash_t e_id = (hash_t)hasher(uuid);
 
+	// new
+	if (infotbl->malicious_truth)
+	{ // if malicious truth is provided
+		auto mal_uuid = infotbl->maliciousInteractionMap.find(uuid);
+		if (mal_uuid != infotbl->maliciousInteractionMap.end())
+		{ // if event is malicious
+			auto it1 = std::find(subjobj.begin(), subjobj.end(), syscall_str);
+			auto it2 = std::find(objsubj.begin(), objsubj.end(), syscall_str);
+
+			if (it1!=subjobj.end()){
+				KGEdge *e = new KGEdge(sub_id, obj_id, EdgeType_t::NotDefined, seq, sess, e_id, timestamp);
+				infotbl->InsertMaliciousEdge(e_id, e);
+			}
+			else if (it2!=objsubj.end()){	
+				KGEdge *e = new KGEdge(obj_id, sub_id, EdgeType_t::NotDefined, seq, sess, e_id, timestamp);
+				infotbl->InsertMaliciousEdge(e_id, e);
+			}
+			else if (syscall_str == "EVENT_RENAME"){
+				std::string obj2 = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["predicateObject2"]["com.bbn.tc.schema.avro.cdm18.UUID"]);
+				std::hash<std::string> hasher;
+        		hash_t obj2_id = (hash_t)hasher(obj2);
+        		std::string sess_str = std::to_string(sess);
+				hash_t e1_id = (hash_t)hasher(sess_str + obj);
+        		hash_t e2_id = (hash_t)hasher(sess_str + obj2);
+				KGEdge *e1 = new KGEdge(obj_id, sub_id, EdgeType_t::Read, seq, sess, e1_id, timestamp);
+				KGEdge *e2 = new KGEdge(sub_id, obj2_id, EdgeType_t::Write, seq, sess, e2_id, timestamp);
+				infotbl->InsertMaliciousEdge(e_id, e1);
+				infotbl->InsertMaliciousEdge(e_id, e2);
+			}
+			else if (syscall_str == "EVENT_UPDATE"){
+				std::string obj2 = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Event"]["predicateObject2"]["com.bbn.tc.schema.avro.cdm18.UUID"]);
+				std::hash<std::string> hasher;
+				hash_t obj2_id = (hash_t)hasher(obj2);
+				std::string sess_str = std::to_string(sess);
+				// sess string with obj to make up a new edge id
+				hash_t e1_id = (hash_t)hasher(sess_str + obj);
+				hash_t e2_id = (hash_t)hasher(sess_str + obj2);
+				KGEdge *e1 = new KGEdge(obj_id, sub_id, EdgeType_t::Delete, seq, sess, e1_id, timestamp);
+				KGEdge *e2 = new KGEdge(sub_id, obj2_id, EdgeType_t::Create, seq, sess, e2_id, timestamp);
+				infotbl->InsertMaliciousEdge(e_id, e1);
+				infotbl->InsertMaliciousEdge(e_id, e2);
+			}
+			
+		}
+	}
+
 	switch (syscallMap[syscall_str])
 	{
 	case SyscallType_t::Execve:
@@ -397,13 +443,17 @@ void Triplet::LoadProc()
 	std::string uuid = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.Subject"]["uuid"]);
 
 	NodeProc *p_temp = new NodeProc(pid, exe, args, ppid, uuid);
-	infotbl->InsertProc(p_temp);
+	NodeProc * p = infotbl->InsertProc(p_temp);
+
+	if (p_temp == p){ //new node
+		infotbl->InsertNodeHashToUuidPair(*(p_temp->id), uuid);
+	}
 
 	// new
 	// std::cout << "CHECK THIS: " << *(p_temp->id) << " " << uuid << std::endl;
 	// infotbl->nodeHashToUuid[*(p_temp->id)] = uuid;
 	// std::cout << "CHECK THIS OUT: " << infotbl->nodeHashToUuid[*(p_temp->id)] << std::endl;
-	infotbl->InsertNodeHashToUuidPair(*(p_temp->id), uuid);
+	//infotbl->InsertNodeHashToUuidPair(*(p_temp->id), uuid);
 	// std::cout << "TableSize: " << infotbl->nodeHashToUuid.size() << std::endl;
 }
 
@@ -427,11 +477,13 @@ void Triplet::LoadFile()
 	std::string version = " ";
 
 	NodeFile *f_temp = new NodeFile(name, version, uuid);
-	infotbl->InsertFile(f_temp);
+	NodeFile * f = infotbl->InsertFile(f_temp);
 
-	// new
-	// infotbl->nodeHashToUuid[*(f_temp->id)] = uuid;
-	infotbl->InsertNodeHashToUuidPair(*(f_temp->id), uuid);
+
+	if (f_temp == f){
+		infotbl->InsertNodeHashToUuidPair(*(f_temp->id), uuid);
+	}
+
 }
 
 void Triplet::LoadSock()
@@ -442,9 +494,9 @@ void Triplet::LoadSock()
 	std::string uuid = Jval2str(event["datum"]["com.bbn.tc.schema.avro.cdm18.NetFlowObject"]["uuid"]);
 
 	NodeSocket *s_temp = new NodeSocket(sname, uuid);
-	infotbl->InsertSocket(s_temp);
+	NodeSocket *s = infotbl->InsertSocket(s_temp);
 
-	// new
-	// infotbl->nodeHashToUuid[*(s_temp->id)] = uuid;
-	infotbl->InsertNodeHashToUuidPair(*(s_temp->id), uuid);
+	if (s_temp == s){
+		infotbl->InsertNodeHashToUuidPair(*(s_temp->id), uuid);
+	}
 }

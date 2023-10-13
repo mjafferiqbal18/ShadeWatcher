@@ -774,9 +774,9 @@ void LocalStore::StoreTrainFile()
 void LocalStore::StoreRecommendationModelFiles()
 {
 	auto start = OverheadStart();
+	countUniqueInteractions();
 	std::cout << "Storing nodeHashtoUuid file\n";
 	StoreNodeHashToUuidFile();
-
 	std::cout << "Storing entity2id.txt file\n";
 	//StoreEntityFile();
 	StoreEntityFileChecker();
@@ -980,4 +980,70 @@ void LocalStore::StoreNodeHashToUuidFile()
 		}
 	}
 	entity_file.close();
+}
+
+void LocalStore::countUniqueInteractions(){
+	std::set<std::pair<hash_t, hash_t>> uniquePairs;
+	for (auto entry : infotbl->ObjectInteractionTable) {
+		hash_t key = entry.first;
+		const std::vector<hash_t>* values = entry.second;
+
+		if (values) {
+			for (hash_t value : *values) {
+				if (key>value){
+					std::pair<hash_t, hash_t> sortedPair(value,key);
+					uniquePairs.insert(sortedPair);
+				}
+				else{
+					std::pair<hash_t, hash_t> sortedPair(key,value);
+					uniquePairs.insert(sortedPair);
+				}
+			}
+		}
+	}
+
+	int unique_pair_count = 0;
+	for (auto pair: uniquePairs){
+		unique_pair_count++;
+	}
+	std::cout<<std::endl<<"Unqiue Interaction count: "<<unique_pair_count<<std::endl;
+}
+
+void LocalStore::RemoveNoisyNodes()
+{
+	//fill up node relationship map obj
+	infotbl->nodeRelationshipsMapObj.clear();
+	for (const auto &it : infotbl->KGEdgeTable)
+	{
+		KGEdge *edge = it.second;
+		hash_t parent = edge->n1_hash;
+		hash_t child = edge->n2_hash;
+
+		infotbl->nodeRelationshipsMapObj[parent].children.push_back(edge);
+		infotbl->nodeRelationshipsMapObj[child].parents.push_back(edge);
+	}
+
+	std::vector<hash_t> noisy_node_hashes;
+	for (const auto &it : infotbl->KGEdgeTable){
+		if (it.second.children.size()<1 && it.second.parents.size()<1){ //has no incoming or outgoing edges
+			noisy_node_hashes.push_back(it.first);
+		}
+	}
+
+	std::cout << std::endl <<"Number of nodes before noise reduction: "<<infotbl->KGNodeTable.size()<<std::endl;
+	for (auto node_hash : noisy_node_hashes){
+
+		//erase from KGNodeTable
+		auto node_it = infotbl->KGNodeTable.find(node_hash);
+		if (node_it != infotbl->KGNodeTable.end()){ //found in node table
+			infotbl->KGNodeTable.erase(node_it); //erase this node pair
+		}
+
+		//erase from nodeHashToUuid
+		auto node_it2 = infotbl->nodeHashToUuid.find(node_hash);
+		if (node_it2 != infotbl->nodeHashToUuid.end()){ //found in node hash to uuid table
+			infotbl->nodeHashToUuid.erase(node_it2); //erase this node pair
+		}
+	}
+	std::cout << "Number of nodes after noise reduction: "<<infotbl->KGNodeTable.size()<<std::endl;
 }

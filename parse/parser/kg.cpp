@@ -1612,10 +1612,9 @@ std::vector<KGEdge *> KG::FindAllChildren(hash_t p_hash, uint64_t minTime)
         // Find initial mintime if start node
         if (minTime == UINT64_MAX)
         {
-                for (auto &it : nodeRelationshipsMapObj[p_hash].parents) //only checking parent edges
+                for (auto &it : nodeRelationshipsMapObj[p_hash].children) //only checking children edges. Suggested by Dr.Michael
                 {
                         KGEdge *edge = it;
-                        // Check parent edges
                         int64_t timestampNanos = std::stoll(edge->timestamp);
                         if (timestampNanos < minTime){
                                 minTime = timestampNanos;
@@ -1641,7 +1640,9 @@ std::vector<KGEdge *> KG::FindAllChildren(hash_t p_hash, uint64_t minTime)
                 // another check if all edges > min time(and p_hash is dataobject), then dont do dfs on p_hash later
         }
         //type = KGNodeTable[p_hash];
-        // if ((!edge_missed) && (type == NodeType_t::File)) SkipObjectInteractionTable.insert(p_hash);
+        if ((edge_missed) && (type == NodeType_t::File)){
+                //SkipObjectInteractionTable.insert(p_hash);  //Child skipping-> commenting this out
+        }
         return childEdges;
 }
 
@@ -1668,11 +1669,12 @@ void KG::FindOneHopParents(hash_t c_hash, hash_t p_hash, hash_t prevNode)
                 { // if type is not file
                         continue;
                 }
-                // optimization here
-                int64_t count = OneHopChildCount[edge->n1_hash];
+                // optimization here for oneHop parent skipping
+                int64_t count = nodeRelationshipsMapObj[edge->n1_hash].children.size();
+                //int64_t count = OneHopChildCount[edge->n1_hash];
                 if (count == 1)
                 {
-                        std::cout << "SKIPPING " << std::endl; // debugging
+                        //std::cout << "SKIPPING " << std::endl; // debugging
                         SkipObjectInteractionTable.insert(edge->n1_hash);
                 }
         }
@@ -1681,10 +1683,30 @@ void KG::FindOneHopParents(hash_t c_hash, hash_t p_hash, hash_t prevNode)
 // Depth first search implementation for behavior abstraction
 void KG::FindInteractiveEntities(hash_t startNode, hash_t prevNode, hash_t currNode, int8_t depth, std::set<hash_t> &visited, uint64_t minTime)
 {
+        //DFS termination at certain noisy nodes:
+        // if (KGNodeTable[currNode] == NodeType_t::File) {
+        //         NodeFile *node_file = FileNodeTable[currNode];
+        //         for (auto noisy_file :         NoiseFile){
+        //                 if (noisy_file == node_file->name || node_file->name.find(noisy_file) != std::string::npos) {
+        //                        // std::cout<<"Came across noisy file: "<<noisy_file<<std::endl;
+        //                         return;
+        //                 }
+        //         }
+        // }
+        // else if (KGNodeTable[currNode] == NodeType_t::Proc){
+        //         NodeProc *node_proc = ProcNodeTable[currNode];
+        //         for (auto noisy_process : NoiseProc){
+        //                 if (noisy_process == node_proc->exe || node_proc->exe.find(noisy_process) != std::string::npos) {
+        //                        // std::cout<<"Came across noisy process: "<<noisy_process<<std::endl;
+        //                         return;
+        //                 }
+        //         }
+        // }
 
         std::vector<KGEdge *> childEdges = FindAllChildren(currNode, minTime); // returns all children of currNode
         FindOneHopParents(currNode, startNode, prevNode);
-        if (depth == 0 || childEdges.size() == 0)
+        //if (depth == 0 || childEdges.size() == 0)
+        if (childEdges.size() == 0)
         {
                 return;
         }
@@ -1692,7 +1714,9 @@ void KG::FindInteractiveEntities(hash_t startNode, hash_t prevNode, hash_t currN
         {
                 InsertObjectInteractions(startNode, edge->n2_hash);
         }
-        //int count = 0;
+        if (depth==0){ //so if initial depth=5, this will run 6 iterations
+                return;
+        }
         for (auto edge : childEdges)
         {
                 // Optimize here replace set with hashtable or bloomfilter for more optimized datastructure
@@ -1729,7 +1753,7 @@ void KG::FindAllObjectInteractions()
                 { // check File
                         if (SkipObjectInteractionTable.count(it.first) > 0)
                         {
-                                std::cout << "SKIPPING " << it.first << std::endl; // debugging
+                                //std::cout << "SKIPPING " << it.first << std::endl; // debugging
                                 continue;
                         }
                         std::set<hash_t> visited;

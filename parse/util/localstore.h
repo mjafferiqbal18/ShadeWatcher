@@ -51,6 +51,8 @@ public:
     void DumpProcFileSocketEdge2FactSize(int = 0);
 
     void StoreNodeHashToUuidFile();
+    void countUniqueInteractions();
+    void RemoveNoisyNodes();
 };
 
 // load KG from local files
